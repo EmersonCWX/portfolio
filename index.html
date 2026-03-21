@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sabr3 Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --teal: #8B20C0;
+      --teal-glow: rgba(139, 32, 192, 0.65);
+      --teal-dim: rgba(139, 32, 192, 0.25);
+      --midnight: #8B20C0;
+      --bg: #0b0b0b;
+      --surface: rgba(255,255,255,0.03);
+      --text: #e8e8e8;
+      --text-muted: #a0a0a0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Hide scrollbar track but keep scroll functionality */
+    * { scrollbar-width: none; -ms-overflow-style: none; }
+    *::-webkit-scrollbar { display: none; }
+
+    #portfolio-view {
+      padding-top: 48px;
+      padding-bottom: 160px;
+      width: min(780px, 94vw);
+      max-height: 100vh;
+      overflow-y: auto;
+      align-self: stretch;
+    }
+
+    /* ── Canvas starfield ── */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Ambient glow blobs ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: none;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Card ── */
+    .card {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      padding: 48px 56px 100px;
+      max-width: 560px;
+      width: 90vw;
+      text-align: center;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glowIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes drawStroke {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* ── Avatar ── */
+    .avatar-wrapper {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin-bottom: 36px;
+      animation: fadeInUp 1s cubic-bezier(0.3, 0, 0.2, 1) 0.1s both;
+    }
+
+    .avatar-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 22px;
+      background: transparent;
+      box-shadow:
+        0 0 0 2px var(--teal),
+        0 0 10px 3px rgba(139,32,192,0.35),
+        0 0 24px 6px rgba(139,32,192,0.15);
+      pointer-events: none;
+      animation: glowIn 0.8s ease 0.9s both;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+
+    /* ── Name SVG ── */
+    .name-svg {
+      width: 100%;
+      max-width: 520px;
+      height: auto;
+      overflow: visible;
+      margin-bottom: 28px;
+    }
+
+    .name-text {
+      stroke-dasharray: 3000;
+      stroke-dashoffset: 3000;
+      animation: drawStroke 4s cubic-bezier(0.4, 0, 0.2, 1) 1.3s forwards;
+    }
+
+    /* ── Roles ── */
+    .roles {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .role-line {
+      font-size: 14.5px;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+      line-height: 1.5;
+      opacity: 0;
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .role-line:nth-child(1) { animation-delay: 3.1s; }
+    .role-line:nth-child(2) { animation-delay: 3.1s; }
+    .role-line:nth-child(3) { animation-delay: 3.1s; }
+    .role-line:nth-child(4) { animation-delay: 3.1s; }
+
+    .role-line .highlight {
+      color: var(--teal);
+      font-weight: 500;
+    }
+
+    /* ── Tagline ── */
+    .tagline {
+      font-size: 13.5px;
+      font-weight: 400;
+      color: var(--teal);
+      letter-spacing: 0.2px;
+      line-height: 1.55;
+      margin-bottom: 36px;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease 3.1s forwards;
+    }
+
+    /* ── Social pill ── */
+    .socials {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 10px 16px;
+      backdrop-filter: blur(8px);
+      animation: fadeInUp 0.6s ease 3.1s both;
+    }
+
+    .social-btn {
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 17px;
+      text-decoration: none;
+      transition: color 0.2s, background 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+    }
+
+    .social-btn:hover {
+      color: var(--teal);
+      background: var(--teal-dim);
+      box-shadow: 0 0 12px var(--teal-glow);
+    }
+
+    /* ── Page views ── */
+    .view {
+      position: relative;
+      z-index: 1;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .view.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      translate: -50% -50%;
+    }
+
+    /* ── Projects view ── */
+    #projects-view {
+      width: min(900px, 94vw);
+      padding: 48px 24px 100px;
+      text-align: center;
+    }
+
+    .proj-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(36px, 7vw, 60px);
+      font-weight: 900;
+      color: var(--teal);
+      margin-bottom: 10px;
+      text-shadow: 0 0 30px rgba(139,32,192,0.45), 2px 3px 6px rgba(0,0,0,0.7);
+      -webkit-text-stroke: unset;
+    }
+
+    .proj-subtitle {
+      font-size: 14px;
+      color: var(--teal);
+      opacity: 0.75;
+      margin-bottom: 40px;
+      font-style: italic;
+      text-shadow: 1px 2px 4px rgba(0,0,0,0.65);
+      -webkit-text-stroke: unset;
+    }
+
+    .proj-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+
+    @media (max-width: 600px) {
+      .proj-grid { grid-template-columns: 1fr; }
+    }
+
+    .proj-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(139, 32, 192, 0.18);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: left;
+      backdrop-filter: blur(6px);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .proj-card:hover {
+      border-color: rgba(139, 32, 192, 0.45);
+      box-shadow: 0 0 24px rgba(139,32,192,0.18);
+    }
+
+    .proj-card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--teal);
+      margin-bottom: 10px;
+    }
+
+    .proj-card-link {
+      color: inherit;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .proj-card-link:hover {
+      opacity: 0.75;
+      text-decoration: underline;
+    }
+
+    .proj-wip-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--bg);
+      background: var(--teal);
+      border-radius: 20px;
+      padding: 2px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+      opacity: 0.85;
+    }
+
+    .proj-card-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .proj-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .proj-tag {
+      font-size: 11.5px;
+      color: var(--teal);
+      border: 1px solid rgba(139, 32, 192, 0.35);
+      border-radius: 20px;
+      padding: 3px 11px;
+      opacity: 0.9;
+    }
+
+    /* ── Portfolio / Skills view ── */
+    #portfolio-view {
+      width: min(780px, 92vw);
+      padding: 52px 28px 100px;
+      text-align: center;
+    }
+
+    .skills-heading {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(28px, 6vw, 48px);
+      font-weight: 900;
+      color: var(--teal);
+      margin-bottom: 24px;
+      text-shadow: 2px 3px 6px rgba(0,0,0,0.7);
+    }
+
+    .skills-meta {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+      letter-spacing: 0.2px;
+    }
+
+    .skills-role {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 28px;
+    }
+
+    .skills-role strong {
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    .skills-body {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+
+    .skills-body strong {
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    .skills-core-line {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.75;
+    }
+
+    .skills-core-line strong {
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    .skills-divider {
+      width: 80px;
+      height: 1px;
+      background: rgba(139,32,192,0.45);
+      border: none;
+      margin: 32px auto;
+      border-radius: 2px;
+    }
+
+    .labeled-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 660px;
+      margin: 36px auto 28px;
+    }
+    .labeled-divider::before,
+    .labeled-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(139,32,192,0.45);
+    }
+    .labeled-divider span {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      white-space: nowrap;
+    }
+
+    /* ── Photography Carousel ── */
+    .photo-carousel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 780px;
+      margin: 0 auto 48px;
+      user-select: none;
+    }
+    .carousel-stage {
+      position: relative;
+      display: inline-flex;
+      max-width: 100%;
+    }
+    .carousel-track {
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 0 28px rgba(107,10,201,0.35);
+      line-height: 0;
+    }
+    .carousel-track img {
+      display: none;
+      max-width: min(720px, 90vw);
+      max-height: 72vh;
+      width: auto;
+      height: auto;
+      border-radius: 10px;
+      image-rendering: auto;
+    }
+    .carousel-track img.active {
+      display: block;
+    }
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(139,32,192,0.5);
+      color: #fff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      z-index: 2;
+    }
+    .carousel-btn:hover { background: rgba(107,10,201,0.6); }
+    .carousel-btn.prev { left: -20px; }
+    .carousel-btn.next { right: -20px; }
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .carousel-dots button {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s;
+    }
+    .carousel-dots button.active { background: rgba(139,32,192,0.9); }
+    .carousel-counter {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 6px;
+      letter-spacing: 0.1em;
+    }
+
+    .skills-bio {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.85;
+      text-align: center;
+      max-width: 660px;
+      margin: 0 auto;
+    }
+
+    .photo-bio {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.85;
+      text-align: center;
+      max-width: 660px;
+      margin: 0 auto 28px;
+    }
+
+    .proj-github-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 13px 30px;
+      border: 1.5px solid var(--teal);
+      border-radius: 30px;
+      color: var(--teal);
+      font-size: 14.5px;
+      font-weight: 600;
+      text-decoration: none;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .proj-github-btn:hover {
+      background: rgba(139,32,192,0.10);
+      box-shadow: 0 0 20px rgba(139,32,192,0.35);
+    }
+
+    /* ── Persistent nav ── */
+    #bottom-bar {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      opacity: 0;
+      animation: navFadeIn 0.6s ease 3.1s forwards;
+    }
+
+    @keyframes navFadeIn {
+      from { opacity: 0; bottom: 16px; }
+      to   { opacity: 1; bottom: 32px; }
+    }
+
+    #persistent-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 10px 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    #bottom-tagline {
+      font-size: 15.5px;
+      font-weight: 400;
+      color: var(--teal);
+      letter-spacing: 0.2px;
+      line-height: 1.55;
+      opacity: 0.9;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+
+  <!-- ── Profile view ── -->
+  <div class="card view" id="profile-view">
+
+    <!-- Profile Picture -->
+    <div class="avatar-wrapper">
+      <!-- Replace the src below with your actual image path -->
+      <img
+        class="avatar"
+        src="IMG_8992.jpg"
+        alt="Sabr3's profile picture"
+        onerror="this.style.background='linear-gradient(135deg,#1a1a2e,#16213e)'; this.removeAttribute('src');"
+      />
+    </div>
+
+    <!-- Name -->
+    <svg class="name-svg" viewBox="0 0 520 100" aria-label="Sabr3" role="img">
+      <defs>
+        <filter id="teal-glow" x="-20%" y="-40%" width="140%" height="180%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+          <feColorMatrix in="blur" type="matrix"
+            values="0 0 0 0 0.545   0 0 0 0 0.125   0 0 0.753 0 0   0 0 0 0.6 0" result="purpleBlur"/>
+          <feMerge><feMergeNode in="purpleBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <text
+        x="50%" y="82"
+        text-anchor="middle"
+        font-family="Orbitron, sans-serif"
+        font-weight="900"
+        font-size="88"
+        letter-spacing="4"
+        fill="none"
+        stroke="rgba(255,255,255,0.88)"
+        stroke-width="2"
+        filter="url(#teal-glow)"
+        class="name-text">Sabr3</text>
+    </svg>
+
+    <!-- Roles -->
+    <div class="roles">
+      <span class="role-line">Atmospheric Science Student at <span class="highlight">Vermont State University</span></span>
+      <span class="role-line">Freelance Developer</span>
+      <span class="role-line">Professional Photographer</span>
+      <span class="role-line">Severe weather model coder for <span class="highlight">VTSU Atmospheric Sciences</span>
+    </div>
+
+    <!-- Tagline removed here - now in fixed bottom bar -->
+
+  </div><!-- end #profile-view -->
+
+  <!-- ── Projects view ── -->
+  <div id="projects-view" class="view hidden">
+    <h2 class="proj-title">Projects</h2>
+    <p class="proj-subtitle">Atmospheric science tooling, virtual aviation flight support &amp; open-source work</p>
+
+    <div class="proj-grid">
+
+      <div class="proj-card">
+        <div class="proj-card-title">
+          <a href="https://github.com/EmersonCWX/AVC-Aurora-Visibility-Calculator-" target="_blank" rel="noopener noreferrer" class="proj-card-link">Aurora Visibility Calculator</a>
+        </div>
+        <p class="proj-card-desc">Calculates and predicts aurora borealis visibility based on real-time geomagnetic and solar wind data, with location-aware forecasting.</p>
+        <div class="proj-tags">
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">Space Weather</span>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-card-title">
+          <a href="https://github.com/EmersonCWX/VTSU-Wx-Center" target="_blank" rel="noopener noreferrer" class="proj-card-link">VTSU Wx Center</a>
+        </div>
+        <p class="proj-card-desc">Weather operations center built for Vermont State University Atmospheric Sciences, surfacing live data, forecasts, and severe weather tooling.</p>
+        <div class="proj-tags">
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">Meteorology</span>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-card-title">
+          <a href="https://github.com/EmersonCWX/158FW_Homepage" target="_blank" rel="noopener noreferrer" class="proj-card-link">Virtual 158th Fighter Wing</a>
+        </div>
+        <p class="proj-card-desc">Full squadron homepage for the Virtual Vermont Air National Guard 158th Fighter Wing: rosters, missions, news, and flight operations.</p>
+        <div class="proj-tags">
+          <span class="proj-tag">HTML</span>
+          <span class="proj-tag">CSS</span>
+          <span class="proj-tag">JavaScript</span>
+        </div>
+      </div>
+
+      <div class="proj-card proj-card--wip">
+        <div class="proj-card-title">Meso-Vortice Project <span class="proj-wip-badge">In Development</span></div>
+        <p class="proj-card-desc">Next-generation predictive modeling system targeting mesovortex formation within landfalling major hurricanes.</p>
+        <div class="proj-tags">
+          <span class="proj-tag">Python</span>
+          <span class="proj-tag">NWP</span>
+          <span class="proj-tag">Severe Wx</span>
+        </div>
+      </div>
+
+    </div>
+
+    <a href="https://github.com/EmersonCWX" target="_blank" rel="noopener noreferrer" class="proj-github-btn">
+      <i class="fab fa-github"></i> View More on GitHub
+    </a>
+
+  </div><!-- end #projects-view -->
+
+  <!-- ── Portfolio view ── -->
+  <div id="portfolio-view" class="view hidden">
+
+    <h2 class="skills-heading">Technical Skills &amp; Expertise</h2>
+
+    <p class="skills-meta">VTSU Atmospheric Science B.S. 2029 &nbsp;|&nbsp; NWS Burlington Student Volunteer</p>
+
+    <p class="skills-role"><strong>Lead Developer</strong> at VTSU Atmospheric Sciences</p>
+
+    <p class="skills-body">
+      Specializing in high-fidelity severe weather &amp; space weather modeling systems.<br>
+      Developing the next-generation of mesoscale analysis models and observation devices.
+    </p>
+
+    <p class="skills-core-line">
+      Core technologies: <strong>C++, Python, HTML</strong> &nbsp;|&nbsp; Focus areas: <strong>Performance, Accuracy, Maintainability</strong>
+    </p>
+
+    <div class="labeled-divider"><span>About Me</span></div>
+
+    <p class="skills-bio">
+      I am a dedicated severe weather researcher and a Project Lead for the Meso Vortex Project, specializing in the analysis of hurricane mesovortices and storm structures to enhance damage prediction and warning lead times. Currently collaborating with academic mentors at Vermont State University Lyndon to advance meteorological insights while focused on developing next-generation weather analysis tools and predictive models. This technical expertise is complemented by a strong foundation in radar interpretation, safety coordination, and emergency response, aiming to bridge the gap between field research and innovative atmospheric technology.
+    </p>
+
+    <div class="labeled-divider"><span>My Photography</span></div>
+
+    <p class="photo-bio">
+      With eight years of professional experience, I specialize in military aviation photography, documenting both large-scale unit maneuvers and individual portraits. My recent portfolio highlights include capturing the farewell ceremony and final multi-ship flight of the 5th Battalion, 159th Aviation Regiment (GSAB) in August 2025. Additionally, I have provided coverage for the 459th FTS "Deadly Black Eagles" during their Reliaquest Bowl Flyover and the 100th Fighter Squadron for the "Sunset Viper" detachment, consistently delivering precise, professional imagery within the unique operational constraints of the aviation community.
+    </p>
+
+    <div class="photo-carousel" id="photo-carousel">
+      <div class="carousel-stage">
+        <div class="carousel-track">
+          <img src="portfolio%20pics/1P7A9680-Enhanced-NR-2.jpg" class="active" alt="Photography 1">
+          <img src="portfolio%20pics/1P7A8093-Enhanced-NR.jpg" alt="Photography 2">
+          <img src="portfolio%20pics/1P7A7821-Enhanced-NR.jpg" alt="Photography 3">
+          <img src="portfolio%20pics/1P7A4654-Enhanced-NR-2.jpg" alt="Photography 4">
+          <img src="portfolio%20pics/1P7A4652-Enhanced-NR-2.jpg" alt="Photography 5">
+          <img src="portfolio%20pics/1P7A3040-Enhanced-NR.jpg" alt="Photography 6">
+          <img src="portfolio%20pics/1P7A3022.jpg" alt="Photography 7">
+          <img src="portfolio%20pics/1P7A2431-2.jpg" alt="Photography 8">
+          <img src="portfolio%20pics/1P7A1925-Enhanced-NR.jpg" alt="Photography 9">
+          <img src="portfolio%20pics/1P7A1557-Enhanced-NR.jpg" alt="Photography 10">
+          <img src="portfolio%20pics/1P7A0659-Enhanced-NR.jpg" alt="Photography 11">
+        </div>
+        <button class="carousel-btn prev" aria-label="Previous">&#8249;</button>
+        <button class="carousel-btn next" aria-label="Next">&#8250;</button>
+      </div>
+      <div class="carousel-dots" id="carousel-dots"></div>
+      <p class="carousel-counter" id="carousel-counter">1 / 11</p>
+    </div>
+
+  </div>
+
+  <!-- ── Persistent bottom bar (tagline + nav) ── -->
+  <div id="bottom-bar">
+    <p id="bottom-tagline"><em>Building next-generation predictive models for severe and space weather phenomena.</em></p>
+    <nav id="persistent-nav" aria-label="Site navigation">
+    <a href="#" class="social-btn" title="Home" aria-label="Home">
+      <i class="fas fa-house"></i>
+    </a>
+    <a href="#" class="social-btn" title="Portfolio" aria-label="Portfolio" id="portfolio-btn">
+      <i class="fas fa-hurricane"></i>
+    </a>
+    <a href="#" class="social-btn" title="Projects" aria-label="Projects" id="projects-btn">
+      <i class="fas fa-display"></i>
+    </a>
+    <a href="https://github.com/EmersonCWX" target="_blank" rel="noopener noreferrer" class="social-btn" title="GitHub" aria-label="GitHub">
+      <i class="fab fa-github"></i>
+    </a>
+    <a href="https://discord.com/users/201792177200824321" target="_blank" rel="noopener noreferrer" class="social-btn" title="Discord" aria-label="Discord">
+      <i class="fab fa-discord"></i>
+    </a>
+  </nav>
+  </div><!-- end #bottom-bar -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('starfield');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+
+      function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+        buildStars();
+        draw();
+      }
+
+      function buildStars() {
+        stars = [];
+        // layer 1 — tiny dim stars (dust)
+        for (let i = 0; i < 320; i++) stars.push(makeStar(0.4, 0.9, 0.25, 0.55));
+        // layer 2 — medium stars
+        for (let i = 0; i < 160; i++) stars.push(makeStar(0.9, 1.8, 0.45, 0.80));
+        // layer 3 — bright large stars
+        for (let i = 0; i < 55;  i++) stars.push(makeStar(1.8, 3.2, 0.70, 1.00));
+        // layer 4 — rare giant stars
+        for (let i = 0; i < 12;  i++) stars.push(makeStar(3.2, 5.0, 0.85, 1.00));
+      }
+
+      function makeStar(rMin, rMax, aMin, aMax) {
+        return {
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: rMin + Math.random() * (rMax - rMin),
+          a: aMin + Math.random() * (aMax - aMin),
+          twinkleSpeed: 0.003 + Math.random() * 0.012,
+          twinkleOffset: Math.random() * Math.PI * 2
+        };
+      }
+
+      function drawStar(x, y, r, alpha) {
+        const spikes = 4;
+        const inner  = r * 0.38;
+        ctx.beginPath();
+        for (let i = 0; i < spikes * 2; i++) {
+          const angle  = (i * Math.PI) / spikes - Math.PI / 2;
+          const radius = i % 2 === 0 ? r : inner;
+          const px = x + Math.cos(angle) * radius;
+          const py = y + Math.sin(angle) * radius;
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+        ctx.fill();
+      }
+
+      let tick = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        tick += 1;
+        for (const s of stars) {
+          const flicker = 0.85 + 0.15 * Math.sin(tick * s.twinkleSpeed + s.twinkleOffset);
+          drawStar(s.x, s.y, s.r, s.a * flicker);
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+    })();
+
+    // ── View switcher ──
+    (function () {
+      const profileView   = document.getElementById('profile-view');
+      const projectsView  = document.getElementById('projects-view');
+      const portfolioView = document.getElementById('portfolio-view');
+      const allViews = [profileView, projectsView, portfolioView];
+      const tagline = document.getElementById('bottom-tagline');
+
+      function showView(show) {
+        allViews.forEach(v => v.classList.add('hidden'));
+        show.classList.remove('hidden');
+        tagline.style.display = (show === profileView) ? '' : 'none';
+        if (show === portfolioView) {
+          portfolioView.scrollTop = 0;
+        }
+      }
+
+      document.getElementById('projects-btn').addEventListener('click', function (e) {
+        e.preventDefault();
+        showView(projectsView);
+      });
+
+      document.getElementById('portfolio-btn').addEventListener('click', function (e) {
+        e.preventDefault();
+        showView(portfolioView);
+      });
+
+      document.querySelector('.social-btn[title="Home"]').addEventListener('click', function (e) {
+        e.preventDefault();
+        showView(profileView);
+      });
+    })();
+
+    /* ── Photo Carousel ── */
+    (function () {
+      const imgs = Array.from(document.querySelectorAll('#photo-carousel .carousel-track img'));
+      const dotsContainer = document.getElementById('carousel-dots');
+      const counter = document.getElementById('carousel-counter');
+      let current = 0;
+
+      imgs.forEach((_, i) => {
+        const btn = document.createElement('button');
+        if (i === 0) btn.classList.add('active');
+        btn.addEventListener('click', () => goTo(i));
+        dotsContainer.appendChild(btn);
+      });
+
+      function goTo(n) {
+        imgs[current].classList.remove('active');
+        dotsContainer.children[current].classList.remove('active');
+        current = (n + imgs.length) % imgs.length;
+        imgs[current].classList.add('active');
+        dotsContainer.children[current].classList.add('active');
+        counter.textContent = (current + 1) + ' / ' + imgs.length;
+      }
+
+      document.querySelector('#photo-carousel .prev').addEventListener('click', () => goTo(current - 1));
+      document.querySelector('#photo-carousel .next').addEventListener('click', () => goTo(current + 1));
+    })();
+  </script>
+</body>
+</html>
