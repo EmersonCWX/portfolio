@@ -138,7 +138,7 @@
     /* ── Name SVG ── */
     .name-svg {
       width: 100%;
-      max-width: 520px;
+      max-width: 620px;
       height: auto;
       overflow: visible;
       margin-bottom: 28px;
@@ -616,7 +616,7 @@
     </div>
 
     <!-- Name -->
-    <svg class="name-svg" viewBox="0 0 520 100" aria-label="Sabr3" role="img">
+    <svg class="name-svg" viewBox="0 0 620 110" aria-label="Sabr3" role="img">
       <defs>
         <filter id="teal-glow" x="-20%" y="-40%" width="140%" height="180%">
           <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
@@ -626,7 +626,7 @@
         </filter>
       </defs>
       <text
-        x="50%" y="82"
+        x="50%" y="86"
         text-anchor="middle"
         font-family="Orbitron, sans-serif"
         font-weight="900"
@@ -766,7 +766,7 @@
 
   <!-- ── Persistent bottom bar (tagline + nav) ── -->
   <div id="bottom-bar">
-    <p id="bottom-tagline"><em>Building next-generation predictive models for severe and space weather phenomena.</em></p>
+    <p id="bottom-tagline"><em>Building the next-generation of predictive models for severe and space weather phenomena.</em></p>
     <nav id="persistent-nav" aria-label="Site navigation">
     <a href="#" class="social-btn" title="Home" aria-label="Home">
       <i class="fas fa-house"></i>
@@ -910,6 +910,98 @@
 
       document.querySelector('#photo-carousel .prev').addEventListener('click', () => goTo(current - 1));
       document.querySelector('#photo-carousel .next').addEventListener('click', () => goTo(current + 1));
+    })();
+  </script>
+
+  <!-- Custom cursor -->
+  <canvas id="cursor-star" width="28" height="28"></canvas>
+  <div id="cursor-ring"></div>
+  <div id="cursor-glow"></div>
+  <style>
+    * { cursor: none !important; }
+
+    #cursor-star {
+      position: fixed;
+      pointer-events: none;
+      z-index: 99999;
+      width: 28px;
+      height: 28px;
+      transform: translate(-50%, -50%);
+      transition: none;
+      will-change: left, top;
+    }
+
+    #cursor-ring {
+      position: fixed;
+      pointer-events: none;
+      z-index: 99998;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(180, 180, 180, 0.55);
+      transform: translate(-50%, -50%);
+      transition: left 0.14s ease-out, top 0.14s ease-out;
+      will-change: left, top;
+    }
+
+    #cursor-glow {
+      position: fixed;
+      pointer-events: none;
+      z-index: 99997;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139, 32, 192, 0.22) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      transition: left 0.06s ease-out, top 0.06s ease-out;
+      will-change: left, top;
+    }
+  </style>
+  <script>
+    (function() {
+      const starCanvas = document.getElementById('cursor-star');
+      const ring = document.getElementById('cursor-ring');
+      const glow = document.getElementById('cursor-glow');
+      const ctx  = starCanvas.getContext('2d');
+      const S    = 28; // canvas size
+      const cx   = S / 2, cy = S / 2;
+
+      // Draw 4-pointed star matching background drawStar()
+      function drawCursorStar() {
+        ctx.clearRect(0, 0, S, S);
+        const r      = 10;   // outer radius
+        const inner  = r * 0.38;
+        const spikes = 4;
+        ctx.save();
+        ctx.shadowColor = '#8B20C0';
+        ctx.shadowBlur  = 10;
+        ctx.beginPath();
+        for (let i = 0; i < spikes * 2; i++) {
+          const angle  = (i * Math.PI) / spikes - Math.PI / 2;
+          const radius = i % 2 === 0 ? r : inner;
+          const px = cx + Math.cos(angle) * radius;
+          const py = cy + Math.sin(angle) * radius;
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = '#8B20C0';
+        ctx.fill();
+        ctx.restore();
+      }
+      drawCursorStar();
+
+      let mx = -200, my = -200;
+
+      document.addEventListener('mousemove', e => {
+        mx = e.clientX;
+        my = e.clientY;
+        starCanvas.style.left = mx + 'px';
+        starCanvas.style.top  = my + 'px';
+        ring.style.left = mx + 'px';
+        ring.style.top  = my + 'px';
+        glow.style.left = mx + 'px';
+        glow.style.top  = my + 'px';
+      });
     })();
   </script>
 </body>
