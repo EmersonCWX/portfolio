@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *, *::before, *::after {
       margin: 0;
@@ -596,6 +599,489 @@
       opacity: 0.9;
       white-space: nowrap;
     }
+
+    /* ── Model Explorer view ── */
+    #model-explorer-view {
+      width: min(960px, 96vw);
+      padding: 48px 24px 120px;
+      text-align: center;
+      max-height: 100vh;
+      overflow-y: auto;
+      align-self: stretch;
+    }
+
+    .me-filters {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .me-filter {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      border: 1px solid rgba(139, 32, 192, 0.3);
+      border-radius: 20px;
+      padding: 5px 16px;
+      background: transparent;
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .me-filter:hover,
+    .me-filter.active {
+      color: var(--teal);
+      border-color: var(--teal);
+      background: var(--teal-dim);
+      box-shadow: 0 0 12px var(--teal-glow);
+    }
+
+    .me-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      text-align: left;
+    }
+
+    .me-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(139, 32, 192, 0.18);
+      border-radius: 14px;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      cursor: default;
+    }
+
+    .me-card:hover {
+      border-color: rgba(139, 32, 192, 0.5);
+      box-shadow: 0 0 22px rgba(139, 32, 192, 0.18);
+      transform: translateY(-2px);
+    }
+
+    .me-card-clickable {
+      cursor: pointer;
+    }
+
+    .me-card-clickable:hover {
+      border-color: var(--teal);
+      box-shadow: 0 0 28px rgba(139, 32, 192, 0.28);
+    }
+
+    .me-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .me-desig {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .me-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border-radius: 20px;
+      padding: 3px 9px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: 8px;
+      margin-top: 2px;
+    }
+
+    .me-badge-global   { color: #b07ee0; border: 1px solid rgba(176, 126, 224, 0.4); background: rgba(176, 126, 224, 0.1); }
+    .me-badge-regional { color: #7ab3e0; border: 1px solid rgba(122, 179, 224, 0.4); background: rgba(122, 179, 224, 0.1); }
+    .me-badge-meso     { color: #c4a84e; border: 1px solid rgba(196, 168, 78,  0.4); background: rgba(196, 168, 78,  0.1); }
+    .me-badge-ensemble { color: #7dba84; border: 1px solid rgba(125, 186, 132, 0.4); background: rgba(125, 186, 132, 0.1); }
+    .me-badge-custom   { color: #7adce0; border: 1px solid rgba(122, 220, 224, 0.4); background: rgba(122, 220, 224, 0.1); }
+
+    /* ── AVC view ── */
+    #avc-view {
+      width: min(960px, 96vw);
+      padding: 48px 24px 120px;
+      text-align: center;
+      max-height: 100vh;
+      overflow-y: auto;
+      align-self: stretch;
+    }
+
+    .avc-wrapper {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(139, 32, 192, 0.25);
+      border-radius: 14px;
+      padding: 28px;
+      backdrop-filter: blur(6px);
+      text-align: left;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .avc-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--teal);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(139, 32, 192, 0.3);
+    }
+
+    .avc-section { margin-bottom: 28px; }
+
+    .avc-cards-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .avc-card {
+      background: rgba(139, 32, 192, 0.07);
+      border-left: 3px solid var(--teal);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .avc-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .avc-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .avc-kp-scale {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+    }
+
+    .avc-kp-cell {
+      padding: 10px 4px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.4;
+    }
+
+    .avc-kp-cell.scale-active {
+      outline: 2px solid #fff;
+      transform: scale(1.06);
+    }
+
+    .avc-kp-0 { background: #3ab83a; }
+    .avc-kp-2 { background: #87d87d; }
+    .avc-kp-3 { background: #ffd500; color: #1a1a1a; }
+    .avc-kp-5 { background: #ff9500; }
+    .avc-kp-7 { background: #ff4444; }
+    .avc-kp-8 { background: #8b0000; }
+
+    .avc-chart-box {
+      background: rgba(0,0,0,0.25);
+      border-radius: 8px;
+      padding: 16px;
+      height: 260px;
+      position: relative;
+    }
+
+    .avc-bottom {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      margin-top: 4px;
+    }
+
+    .avc-loading {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--teal);
+      font-size: 14px;
+    }
+
+    .avc-error {
+      background: rgba(236,55,84,0.12);
+      border-left: 3px solid #ec3754;
+      color: #ec3754;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* ── MVRP view ── */
+    #mvrp-view {
+      width: min(1020px, 97vw);
+      padding: 48px 24px 120px;
+      text-align: center;
+      max-height: 100vh;
+      overflow-y: auto;
+      align-self: stretch;
+    }
+
+    .mvrp-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      max-width: 980px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    @media (max-width: 700px) {
+      .mvrp-layout { grid-template-columns: 1fr; }
+    }
+
+    .mvrp-panel {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(139,32,192,0.25);
+      border-radius: 14px;
+      padding: 22px 18px;
+      backdrop-filter: blur(6px);
+    }
+
+    .mvrp-panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      color: var(--teal);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(139,32,192,0.3);
+    }
+
+    .mvrp-storm-card {
+      background: rgba(139,32,192,0.07);
+      border: 1px solid rgba(139,32,192,0.18);
+      border-left: 3px solid var(--teal);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s, border-left-color 0.2s;
+    }
+    .mvrp-storm-card:hover { background: rgba(139,32,192,0.16); border-left-color: #d070ff; }
+    .mvrp-storm-card.active { background: rgba(139,32,192,0.24); border-left-color: #d070ff; box-shadow: 0 0 0 1px rgba(208,112,255,0.3); }
+    .mvrp-storm-card-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #e8e8e8;
+      margin-bottom: 2px;
+    }
+    .mvrp-storm-card-tag {
+      font-size: 10px;
+      color: var(--teal);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 5px;
+    }
+    .mvrp-storm-card-stats {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .mvrp-storm-stat {
+      font-size: 9px;
+      color: rgba(255,255,255,0.55);
+      background: rgba(255,255,255,0.05);
+      border-radius: 3px;
+      padding: 2px 5px;
+    }
+    .mvrp-storm-card-note {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .mvrp-live-badge {
+      display: inline-block;
+      background: #22bb33;
+      color: #000;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      border-radius: 3px;
+      padding: 1px 5px;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .mvrp-live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      display: inline-block;
+      transition: background 0.4s;
+    }
+    .mvrp-no-storms {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 4px 0 10px;
+    }
+    .mvrp-info-bar {
+      display: none;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .mvrp-back-btn {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 5px 16px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .mvrp-back-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+    .mvrp-map-wrap {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(139,32,192,0.2);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      min-height: 360px;
+    }
+
+    #mvrp-map { width: 100%; height: 420px; }
+
+    .mvrp-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 8px 0 4px;
+      min-height: 20px;
+    }
+    .mvrp-status.running { color: var(--teal); }
+    .mvrp-status.error   { color: #ec3754; }
+
+    /* Legend */
+    .mvrp-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .mvrp-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .mvrp-legend-swatch {
+      width: 18px; height: 12px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .mvrp-legend-swatch.hatched {
+      background-image: repeating-linear-gradient(
+        45deg, transparent, transparent 3px,
+        rgba(0,0,0,0.45) 3px, rgba(0,0,0,0.45) 5px
+      );
+    }
+
+    /* Category badge */
+    .mvrp-cat-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      border: 1px solid rgba(139,32,192,0.4);
+      background: rgba(139,32,192,0.12);
+      color: var(--teal);
+    }
+
+    .mvrp-peak-risk {
+      font-size: 26px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      margin: 6px 0 2px;
+    }
+
+    /* Leaflet dark tooltip override */
+    .mvrp-tip {
+      background: rgba(10,10,18,0.92) !important;
+      border: 1px solid rgba(139,32,192,0.5) !important;
+      color: #e8e8e8 !important;
+      font-size: 12px !important;
+      border-radius: 6px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+    }
+    .mvrp-tip::before { display: none !important; }
+    /* Leaflet attribution dark */
+    #mvrp-map .leaflet-control-attribution {
+      background: rgba(0,0,0,0.6) !important;
+      color: rgba(255,255,255,0.4) !important;
+      font-size: 9px !important;
+    }
+    .mvrp-risk-img { filter: blur(0.5px); }  /* subtle anti-alias only */
+
+    .me-nick {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .me-role {
+      font-size: 12px;
+      color: var(--text);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .me-specs {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .me-spec {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .me-spec strong {
+      color: var(--teal);
+      font-weight: 600;
+    }
+
+    .me-notes {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      border-top: 1px solid rgba(139, 32, 192, 0.15);
+      padding-top: 8px;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
@@ -777,6 +1263,9 @@
     <a href="#" class="social-btn" title="Projects" aria-label="Projects" id="projects-btn">
       <i class="fas fa-display"></i>
     </a>
+    <a href="#" class="social-btn" title="Model Explorer" aria-label="Model Explorer" id="model-btn">
+      <i class="fas fa-jet-fighter"></i>
+    </a>
     <a href="https://github.com/EmersonCWX" target="_blank" rel="noopener noreferrer" class="social-btn" title="GitHub" aria-label="GitHub">
       <i class="fab fa-github"></i>
     </a>
@@ -785,6 +1274,118 @@
     </a>
   </nav>
   </div><!-- end #bottom-bar -->
+
+  <!-- ── MVRP view ── -->
+  <div id="mvrp-view" class="view hidden">
+    <button class="mvrp-back-btn" id="mvrp-back-btn">&#8592; Model Explorer</button>
+    <h2 class="proj-title">MVRP</h2>
+    <p class="proj-subtitle">Experimental Mesovortex Risk Parameter - CONUS Landfall Analysis</p>
+
+    <div class="mvrp-layout">
+
+      <!-- Storm selector panel -->
+      <div class="mvrp-panel">
+
+        <div class="mvrp-panel-title" style="display:flex;align-items:center;justify-content:space-between">
+          LIVE STORMS <span class="mvrp-live-dot" id="mvrp-live-dot"></span>
+        </div>
+        <div id="mvrp-live-status" class="mvrp-no-storms">Checking NHC&hellip;</div>
+        <div id="mvrp-live-cards"></div>
+
+        <div class="mvrp-panel-title" style="margin-top:16px">HISTORICAL CASES</div>
+        <div id="mvrp-hist-cards"></div>
+
+        <!-- Legend -->
+        <div class="mvrp-legend">
+          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#22bb33"></div>5&ndash;15%</div>
+          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#d4e600"></div>15&ndash;30%</div>
+          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#ffcc00"></div>30&ndash;45%</div>
+          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#ff6600"></div>45&ndash;60%</div>
+          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#dd1111"></div>60&ndash;75%</div>
+          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch hatched" style="background:#cc00cc"></div>75&ndash;90% &#9730;</div>
+          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch hatched" style="background:#ff69b4"></div>90%+ &#9730;</div>
+        </div>
+      </div>
+
+      <!-- Map panel -->
+      <div>
+        <div class="mvrp-info-bar" id="mvrp-info-bar">
+          <span class="mvrp-cat-badge" id="mvrp-cat-badge"></span>
+          <span style="font-size:11px;color:var(--text-muted)">Peak mesovortex risk</span>
+          <span class="mvrp-peak-risk" id="mvrp-peak-val" style="font-size:20px;margin:0"></span>
+        </div>
+        <div class="mvrp-status" id="mvrp-status">Select a storm from the panel to run the analysis.</div>
+        <div class="mvrp-map-wrap">
+          <div id="mvrp-map"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── AVC view ── -->
+  <div id="avc-view" class="view hidden">
+    <button class="mvrp-back-btn" id="avc-back-btn">&#8592; Model Explorer</button>
+    <h2 class="proj-title">AVC</h2>
+    <p class="proj-subtitle">Aurora Visibility Calculator</p>
+
+    <div class="avc-error" id="avc-error"></div>
+    <div class="avc-loading" id="avc-loading">Loading aurora forecast data&hellip;</div>
+
+    <div class="avc-wrapper" id="avc-content" style="display:none">
+
+      <div class="avc-section">
+        <div class="avc-section-title">Current Aurora Forecast</div>
+        <div class="avc-cards-row">
+          <div class="avc-card"><div class="avc-label">Current Kp Index</div><div class="avc-value" id="avc-kp">--</div></div>
+          <div class="avc-card"><div class="avc-label">Your Location</div><div class="avc-value" style="font-size:13px;font-family:Inter,sans-serif" id="avc-loc">Detecting&hellip;</div></div>
+          <div class="avc-card"><div class="avc-label">Cloud Cover</div><div class="avc-value" style="font-size:14px;font-family:Inter,sans-serif" id="avc-cloud">--</div></div>
+          <div class="avc-card"><div class="avc-label">Bz (Magnetic Field)</div><div class="avc-value" id="avc-bz">-- nT</div></div>
+          <div class="avc-card"><div class="avc-label">Aurora Visibility Rating</div><div class="avc-value" style="font-size:12px;font-family:Inter,sans-serif" id="avc-rating">--</div></div>
+          <div class="avc-card"><div class="avc-label">Best Viewing Time (Tonight)</div><div class="avc-value" style="font-size:12px;font-family:Inter,sans-serif">22:00 &ndash; 04:00 UTC</div></div>
+        </div>
+      </div>
+
+      <div class="avc-section">
+        <div class="avc-section-title">Kp Index Scale</div>
+        <div class="avc-kp-scale">
+          <div class="avc-kp-cell avc-kp-0" data-min="0" data-max="2">0&ndash;1<br><small>Quiet</small></div>
+          <div class="avc-kp-cell avc-kp-2" data-min="2" data-max="3">2<br><small>Unsettled</small></div>
+          <div class="avc-kp-cell avc-kp-3" data-min="3" data-max="5">3&ndash;4<br><small>Active</small></div>
+          <div class="avc-kp-cell avc-kp-5" data-min="5" data-max="7">5&ndash;6<br><small>Minor Storm</small></div>
+          <div class="avc-kp-cell avc-kp-7" data-min="7" data-max="8">7<br><small>Moderate</small></div>
+          <div class="avc-kp-cell avc-kp-8" data-min="8" data-max="10">8&ndash;9<br><small>Severe</small></div>
+        </div>
+      </div>
+
+      <div class="avc-section">
+        <div class="avc-section-title">24-Hour Kp Index Forecast</div>
+        <div class="avc-chart-box">
+          <canvas id="avc-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="avc-bottom">
+        Data: NOAA Space Weather Prediction Center &nbsp;&bull;&nbsp;
+        Last updated: <span id="avc-update-time">--:--:-- UTC</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Model Explorer view ── -->
+  <div id="model-explorer-view" class="view hidden">
+    <h2 class="proj-title">Model Sandbox</h2>
+    <p class="proj-subtitle">Forecasting models</p>
+
+    <div class="me-filters">
+      <button class="me-filter active" data-cat="all">All</button>
+      <button class="me-filter" data-cat="Global">Global</button>
+      <button class="me-filter" data-cat="Mesoscale">Mesoscale</button>
+      <button class="me-filter" data-cat="Custom">Custom</button>
+    </div>
+
+    <div class="me-grid" id="me-grid"></div>
+  </div>
   <script>
     (function () {
       const canvas = document.getElementById('starfield');
@@ -854,19 +1455,23 @@
 
     // ── View switcher ──
     (function () {
-      const profileView   = document.getElementById('profile-view');
-      const projectsView  = document.getElementById('projects-view');
-      const portfolioView = document.getElementById('portfolio-view');
-      const allViews = [profileView, projectsView, portfolioView];
+      const profileView       = document.getElementById('profile-view');
+      const projectsView      = document.getElementById('projects-view');
+      const portfolioView     = document.getElementById('portfolio-view');
+      const modelExplorerView = document.getElementById('model-explorer-view');
+      const avcView            = document.getElementById('avc-view');
+      const mvrpView           = document.getElementById('mvrp-view');
+      const allViews = [profileView, projectsView, portfolioView, modelExplorerView, avcView, mvrpView];
       const tagline = document.getElementById('bottom-tagline');
 
       function showView(show) {
         allViews.forEach(v => v.classList.add('hidden'));
         show.classList.remove('hidden');
         tagline.style.display = (show === profileView) ? '' : 'none';
-        if (show === portfolioView) {
-          portfolioView.scrollTop = 0;
-        }
+        if (show === portfolioView) portfolioView.scrollTop = 0;
+        if (show === modelExplorerView) modelExplorerView.scrollTop = 0;
+        if (show === avcView)  { avcView.scrollTop  = 0; avcInit(); }
+        if (show === mvrpView) { mvrpView.scrollTop = 0; if (window.mvrpInit) window.mvrpInit(); }
       }
 
       document.getElementById('projects-btn').addEventListener('click', function (e) {
@@ -879,11 +1484,826 @@
         showView(portfolioView);
       });
 
+      document.getElementById('model-btn').addEventListener('click', function (e) {
+        e.preventDefault();
+        showView(modelExplorerView);
+      });
+
+      window._showAVC  = function () { showView(avcView); };
+      window._showMVRP = function () { showView(mvrpView); };
+
       document.querySelector('.social-btn[title="Home"]').addEventListener('click', function (e) {
         e.preventDefault();
         showView(profileView);
       });
     })();
+
+    // ── Model Explorer ──
+    (function () {
+      const MODELS = [
+        { cat: 'Global',    desig: 'GFS',   nick: 'Global Forecast System',          dev: 'NOAA / NCEP',  res: '~13 km', horizon: '384 hr',    cycle: '4x daily',     notes: 'Primary US global model; backbone of operational NWS forecasting' },
+        { cat: 'Global',    desig: 'ECMWF', nick: 'European Centre Medium-Range WF', dev: 'ECMWF',        res: '~9 km',  horizon: '240 hr',    cycle: '2x daily',     notes: 'Consistently highest global skill; gold standard for medium-range outlooks' },
+        { cat: 'Mesoscale', desig: 'HRRR',  nick: 'High-Resolution Rapid Refresh',   dev: 'NOAA / NCAR',  res: '~3 km',  horizon: '48 hr',     cycle: 'Hourly',       notes: 'Convection-allowing; gold standard for real-time CONUS mesoscale wx' },
+        { cat: 'Custom',    desig: 'AVC',   nick: 'Aurora Visibility Calculator',    dev: 'Sabr3 / VTSU', res: 'N/A',    horizon: 'Real-time', cycle: 'On demand',    notes: 'Predicts aurora borealis visibility using real-time geomagnetic and solar wind data with location-aware forecasting', action: 'avc' },
+        { cat: 'Custom',    desig: 'MVRP',  nick: 'Mesovortex Risk Parameter',       dev: 'Sabr3 / VTSU', res: '~3 km',  horizon: '6-12 hr',   cycle: 'Experimental', notes: 'Next-generation parameter targeting mesovortex formation within landfalling major hurricanes; Meso-Vortice Project', action: 'mvrp' },
+      ];
+
+      const grid = document.getElementById('me-grid');
+      const badgeClass = { 'Global': 'me-badge-global', 'Mesoscale': 'me-badge-meso', 'Custom': 'me-badge-custom' };
+
+      function renderCards(models) {
+        grid.innerHTML = '';
+        models.forEach(m => {
+          const card = document.createElement('div');
+          card.className = 'me-card' + (m.action ? ' me-card-clickable' : '');
+          card.innerHTML = `
+            <div class="me-card-header">
+              <span class="me-desig">${m.desig}</span>
+              <span class="me-badge ${badgeClass[m.cat]}">${m.cat}</span>
+            </div>
+            <div class="me-nick">${m.nick}</div>
+            <div class="me-role">${m.dev}</div>
+            <div class="me-specs">
+              <span class="me-spec"><strong>Res</strong> ${m.res}</span>
+              <span class="me-spec"><strong>Horizon</strong> ${m.horizon}</span>
+              <span class="me-spec"><strong>Cycle</strong> ${m.cycle}</span>
+            </div>
+            <div class="me-notes">${m.notes}</div>
+            ${m.action ? '<div style="margin-top:10px;font-size:11px;font-weight:700;letter-spacing:0.05em;color:var(--teal)">Launch &#8594;</div>' : ''}
+          `;
+          if (m.action) {
+            card.addEventListener('click', function () {
+              if (m.action === 'avc')  { window._showAVC(); }
+              if (m.action === 'mvrp') { window._showMVRP(); }
+            });
+          }
+          grid.appendChild(card);
+        });
+      }
+
+      renderCards(MODELS);
+
+      document.querySelectorAll('.me-filter').forEach(btn => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.me-filter').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          const cat = this.dataset.cat;
+          renderCards(cat === 'all' ? MODELS : MODELS.filter(m => m.cat === cat));
+        });
+      });
+    })();
+
+    // ── MVRP (Mesovortex Risk Parameter) ──
+    (function () {
+      // ── Math kernel (mirrors mvrp_core.cpp) ──
+      const DEG2RAD = Math.PI / 180;
+      const EARTH_R = 6371;
+
+      function haversine(lat1, lon1, lat2, lon2) {
+        const dlat = (lat2 - lat1) * DEG2RAD;
+        const dlon = (lon2 - lon1) * DEG2RAD;
+        const a = Math.sin(dlat/2)**2
+                + Math.cos(lat1*DEG2RAD)*Math.cos(lat2*DEG2RAD)*Math.sin(dlon/2)**2;
+        return 2 * EARTH_R * Math.asin(Math.sqrt(a));
+      }
+
+      function bearing(lat1, lon1, lat2, lon2) {
+        const dlon = (lon2 - lon1) * DEG2RAD;
+        const y = Math.sin(dlon) * Math.cos(lat2*DEG2RAD);
+        const x = Math.cos(lat1*DEG2RAD)*Math.sin(lat2*DEG2RAD)
+                - Math.sin(lat1*DEG2RAD)*Math.cos(lat2*DEG2RAD)*Math.cos(dlon);
+        return (Math.atan2(y, x) / DEG2RAD + 360) % 360;
+      }
+
+      function bearingDiff(heading, toPoint) {
+        let d = toPoint - heading;
+        while (d >  180) d -= 360;
+        while (d < -180) d += 360;
+        return d;
+      }
+
+      function intensityFactor(wind) {
+        return Math.max(0, Math.min(1, (wind - 55) / (137 - 55)));
+      }
+
+      // Smaller, tighter eye = stronger barotropic shear = more mesovortex
+      // instability. Exponential so a contracting eye (30→20km) drives a
+      // steep rise rather than a gentle linear climb.
+      function eyeFactor(eyeDiam) {
+        if (eyeDiam <= 0) return 0.6;
+        // Normalise: eye=10km → 1.0, eye=60km → ~0.08
+        return Math.max(0, Math.min(1, Math.exp(-0.045 * (eyeDiam - 10))));
+      }
+
+      function quadrantFactor(diffDeg, distKm, rmaxKm) {
+        const rNorm = distKm / Math.max(rmaxKm, 1);
+
+        // ── Hard outer cutoff ──────────────────────────────────────────────
+        // Mesovortices exist only within the eyewall. Beyond 2.5× RMW the
+        // convective ring ends and barotropic instability collapses to zero.
+        if (rNorm > 2.5) return 0;
+
+        // ── Radial ring ────────────────────────────────────────────────────
+        // Gaussian peaked exactly at the RMW (rNorm=1). σ=0.28 ≈ half-width
+        // of ~0.3×RMW so the meaningful ring spans roughly 0.4–1.6× RMW.
+        const radial = Math.exp(-0.5 * ((rNorm - 1.0) / 0.28) ** 2);
+
+        // ── Angular confinement ────────────────────────────────────────────
+        // A mesovortex lives ≤25 s. At 60 m/s eyewall wind that is ~1.5 km
+        // of arc travel, or <1° of the eyewall circle for a 37km-RMW storm.
+        // Each vortex therefore forms AND dissipates within its birth sector;
+        // it cannot rotate from the left-rear to the right-front quadrant.
+        // A Gaussian with σ=65° captures this tight confinement:
+        //   right-front +45°  → angular = 1.00 (maximum)
+        //   forward      +90°  → angular = 0.73
+        //   right-rear     0°  → angular = 0.73
+        //   left-front  +135°  → angular = 0.22
+        //   left-rear   -135°  → angular = 0.09
+        //   dead behind -180°  → angular = 0.04
+        // Storm translation adds to wind on the right side (super-rotation),
+        // which is why the peak sits at +45° (right-of-motion forward sector).
+        const angOff  = ((diffDeg - 45) + 540) % 360 - 180; // ∈ [-180, +180]
+        const angular = Math.exp(-0.5 * (angOff / 65) ** 2);
+
+        return angular * radial;
+      }
+
+// ── Coastal land-interaction enhancement ──────────────────────────────
+      // Observed: areas 0-4 statute miles inland show elevated mesovortex
+      // damage swaths. Mechanism: sudden roughness jump at the land-sea
+      // boundary disrupts balanced eyewall flow, injecting boundary-layer
+      // vorticity that coalesces into more frequent / longer-lived mesovortices.
+      //
+      // CONUS Gulf + Atlantic SE coast polyline (directed W→E along Gulf, then
+      // S→N up the Atlantic).  Inland = LEFT side of the directed polyline
+      // (2-D cross product > 0).  Covers TX→FL Gulf coast and FL→VA Atlantic.
+      const COAST_PTS = [
+        [25.9,-97.4],[27.8,-97.4],[28.5,-96.4],[29.3,-94.8],[29.7,-93.9],
+        [29.8,-93.3],[29.5,-92.2],[29.7,-91.2],[29.6,-90.7],[29.2,-90.0],
+        [29.0,-89.8],[29.1,-89.4],[29.0,-89.2],[30.4,-88.9],[30.7,-88.0],
+        [30.4,-87.2],[30.2,-85.7],[29.7,-85.0],[29.8,-84.7],[29.9,-83.6],
+        [29.1,-83.0],[28.9,-82.6],[28.2,-82.8],[27.8,-82.7],[27.3,-82.6],
+        [26.9,-82.2],[26.6,-82.0],[26.2,-81.7],[25.8,-81.4],[25.1,-81.1],
+        [24.8,-81.0],[24.6,-81.8],[24.7,-81.0],[25.1,-80.4],[25.5,-80.4],
+        [25.8,-80.2],[26.1,-80.1],[26.7,-80.0],[27.5,-80.3],[28.1,-80.7],
+        [28.6,-81.0],[29.2,-81.0],[29.8,-81.3],[30.3,-81.4],[30.7,-81.5],
+        [31.1,-81.5],[31.7,-81.2],[32.1,-80.8],[32.8,-79.9],[33.5,-79.1],
+        [33.8,-78.0],[34.2,-77.9],[34.7,-76.7],[35.2,-75.5],[35.9,-75.6],
+        [36.9,-76.0],
+      ];
+
+      // Distance from point P to segment A→B (km, using haversine for the
+      // clamped projection point so curvature is handled correctly).
+      function distToSegKm(pLat,pLon, aLat,aLon, bLat,bLon) {
+        const dx=bLon-aLon, dy=bLat-aLat;
+        const len2=dx*dx+dy*dy;
+        if (len2 < 1e-12) return haversine(pLat,pLon,aLat,aLon);
+        const t = Math.max(0, Math.min(1,
+          ((pLon-aLon)*dx + (pLat-aLat)*dy) / len2));
+        return haversine(pLat,pLon, aLat+t*dy, aLon+t*dx);
+      }
+
+      // Returns a multiplier applied to mesovortex risk for coastal land zones.
+      // Peak = 1.45 right at the shoreline, falling linearly to 1.0 at 4 mi.
+      // No enhancement is applied offshore (cross-product <= 0).
+      function coastalFactor(lat, lon) {
+        const LAND_KM = 4 * 1.60934;   // 4 statute miles = 6.44 km
+        let minD = Infinity, bestCross = 0;
+        for (let i = 0; i < COAST_PTS.length - 1; i++) {
+          const [aLat,aLon] = COAST_PTS[i];
+          const [bLat,bLon] = COAST_PTS[i+1];
+          const d = distToSegKm(lat,lon, aLat,aLon, bLat,bLon);
+          if (d < minD) {
+            minD = d;
+            // 2-D cross product: positive → left side of A→B → inland
+            const daX=bLon-aLon, daY=bLat-aLat;
+            const dpX=lon-aLon,  dpY=lat-aLat;
+            bestCross = daX*dpY - daY*dpX;
+          }
+        }
+        // Only enhance inland points within 4 statute miles of the coast
+        if (bestCross <= 0 || minD > LAND_KM) return 1.0;
+        return 1.0 + 0.45 * (1 - minD / LAND_KM);
+      }
+
+      function computeRisk(sLat, sLon, heading, wind, eyeDiam, rmax, gLat, gLon) {
+        const dist  = haversine(sLat, sLon, gLat, gLon);
+        const brng  = bearing(sLat, sLon, gLat, gLon);
+        const diff  = bearingDiff(heading, brng);
+        const I     = intensityFactor(wind);
+        const E     = eyeFactor(eyeDiam);
+        const Q     = quadrantFactor(diff, dist, rmax);
+        // Land interaction: 0-4 miles inland from any CONUS coastline gets
+        // up to 1.45× the base mesovortex probability (roughness discontinuity
+        // effect).  Offshore grid points are unaffected (factor = 1.0).
+        const CF    = coastalFactor(gLat, gLon);
+        const base  = I * E * Q * CF;
+        const bonus = (wind >= 130 && eyeDiam > 0 && eyeDiam <= 25) ? 0.15 * Q * CF : 0;
+        return Math.max(0, Math.min(100, (base + bonus) * 100));
+      }
+
+      // Grid step 0.25° ≈ 28km — fine enough to resolve a 37km RMW with
+      // 2–3 sample points across the eyewall width.
+      const STEP = 0.25;
+      const gridPts = [];
+      for (let lat = 24; lat <= 50; lat += STEP)
+        for (let lon = -125; lon <= -65; lon += STEP)
+          gridPts.push([lat, lon]);
+
+      // ── Risk → colour tiers (15% increments) ──
+      const TIERS = [
+        { lo:  0, hi:  15, col: '#22bb33', hatch: false },
+        { lo: 15, hi:  30, col: '#d4e600', hatch: false },
+        { lo: 30, hi:  45, col: '#ffcc00', hatch: false },
+        { lo: 45, hi:  60, col: '#ff6600', hatch: false },
+        { lo: 60, hi:  75, col: '#dd1111', hatch: false },
+        { lo: 75, hi:  90, col: '#cc00cc', hatch: true  },
+        { lo: 90, hi: 101, col: '#ff69b4', hatch: true  },
+      ];
+      function riskTier(pct) { return TIERS.find(t => pct >= t.lo && pct < t.hi) || TIERS[0]; }
+
+      function category(wind) {
+        if (wind < 64)  return 'Tropical Storm';
+        if (wind < 83)  return 'Cat-1 Hurricane';
+        if (wind < 96)  return 'Cat-2 Hurricane';
+        if (wind < 113) return 'Cat-3 Hurricane';
+        if (wind < 137) return 'Cat-4 Hurricane';
+        return 'Cat-5 Hurricane';
+      }
+
+      // ── Historical storm database ──
+      // Parameters reflect NHC best track data at time of landfall.
+      // eye / rmax are estimates where not officially published.
+      const HISTORICAL = [
+        {
+          name: 'Helene', year: 2024,
+          tag:  'Cat-4 · Sep 26, 2024',
+          lat: 29.9, lon: -83.7, heading: 355, wind: 120, eye: 38, rmax: 37,
+          note: 'Landfall near Perry, FL — catastrophic flooding across Appalachians & SE US',
+        },
+        {
+          name: 'Milton', year: 2024,
+          tag:  'Cat-3 · Oct 9, 2024',
+          lat: 27.2, lon: -82.4, heading: 88, wind: 100, eye: 16, rmax: 24,
+          note: 'Landfall near Siesta Key, FL — record rapid intensification (Cat-5 peak 180 kt)',
+        },
+        {
+          name: 'Melissa', year: 2025,
+          tag:  'Cat-2 · est. 2025',
+          lat: 29.2, lon: -89.3, heading: 15, wind: 88, eye: 42, rmax: 52,
+          note: 'Gulf Coast landfall — estimated parameters (refine with NHC best track data)',
+        },
+      ];
+
+      // ── Empirical RMW / eye estimates for live NHC data ──
+      function estimateRmax(wind) {
+        // Simplified: larger rmax at lower intensities, contracts as storm strengthens
+        return Math.max(15, Math.round(90 - (wind - 64) * 0.48));
+      }
+      function estimateEye(rmax) {
+        return Math.max(8, Math.round(rmax * 0.58));
+      }
+
+      // ── Leaflet map ──
+      let mvrpMap    = null;
+      let riskLayer  = null;
+      let stormMark  = null;
+      let mvrpInited = false;
+      let activeCard = null;
+
+      // ── Render a storm card into a container ──
+      function renderStormCard(container, storm) {
+        const card = document.createElement('div');
+        card.className = 'mvrp-storm-card';
+        card.innerHTML =
+          `<div class="mvrp-storm-card-name">${storm.name} ${storm.year}` +
+          (storm.live ? ' <span class="mvrp-live-badge">LIVE</span>' : '') +
+          `</div>
+           <div class="mvrp-storm-card-tag">${storm.tag}</div>
+           <div class="mvrp-storm-card-stats">
+             <span class="mvrp-storm-stat">${Math.round(storm.wind)} kt</span>
+             <span class="mvrp-storm-stat">Eye ~${Math.round(storm.eye)} km</span>
+             <span class="mvrp-storm-stat">RMW ~${Math.round(storm.rmax)} km</span>
+             <span class="mvrp-storm-stat">Hdg ${Math.round(storm.heading)}°</span>
+           </div>
+           <div class="mvrp-storm-card-note">${storm.note}</div>`;
+        card.addEventListener('click', () => runAnalysis(storm, card));
+        container.appendChild(card);
+      }
+
+      // ── Fetch active NHC storms ──
+      async function fetchLiveStorms() {
+        const statusEl = document.getElementById('mvrp-live-status');
+        const cardsEl  = document.getElementById('mvrp-live-cards');
+        const dotEl    = document.getElementById('mvrp-live-dot');
+        try {
+          const r = await fetch('https://www.nhc.noaa.gov/CurrentStorms.json');
+          if (!r.ok) throw new Error('NHC unavailable');
+          const d = await r.json();
+          // Only show TC-strength storms (hurricane = ≥64 kt)
+          const storms = (d.activeStorms || []).filter(s => parseFloat(s.intensity || 0) >= 64);
+          if (storms.length === 0) {
+            statusEl.textContent = 'No active hurricanes — select a historical case below.';
+            return;
+          }
+          statusEl.textContent = `${storms.length} active storm${storms.length > 1 ? 's' : ''} — NHC`;
+          dotEl.style.background = '#22bb33';
+          storms.forEach(s => {
+            const wind  = parseFloat(s.intensity);
+            const lat   = parseFloat(s.latitudeNumeric  ?? s.latitude);
+            const lon   = parseFloat(s.longitudeNumeric ?? s.longitude);
+            const hdg   = parseFloat(s.movementDir ?? 0);
+            const rmax  = estimateRmax(wind);
+            const eye   = estimateEye(rmax);
+            const name  = s.name.charAt(0).toUpperCase() + s.name.slice(1).toLowerCase();
+            const yr    = new Date(s.lastUpdate).getFullYear();
+            renderStormCard(cardsEl, {
+              name, year: yr,
+              tag:  category(wind) + ' · Live',
+              lat, lon, heading: hdg, wind, eye, rmax,
+              note: 'Updated ' + new Date(s.lastUpdate).toUTCString(),
+              live: true,
+            });
+          });
+        } catch (e) {
+          statusEl.textContent = 'NHC data unavailable — select a historical case below.';
+        }
+      }
+
+      // ── Run analysis for a storm object ──
+      function runAnalysis(storm, cardEl) {
+        if (activeCard) activeCard.classList.remove('active');
+        activeCard = cardEl;
+        if (cardEl) cardEl.classList.add('active');
+
+        const { lat: sLat, lon: sLon, heading, wind, eye: eyeDiam, rmax } = storm;
+        const statusEl = document.getElementById('mvrp-status');
+        statusEl.className = 'mvrp-status running';
+        statusEl.textContent = `Analyzing ${storm.name} ${storm.year} (${storm.tag})…`;
+
+        setTimeout(() => {
+          const risks = gridPts.map(([lat, lon]) =>
+            computeRisk(sLat, sLon, heading, wind, eyeDiam, rmax, lat, lon));
+          const peak = Math.max(...risks);
+
+          if (riskLayer) { mvrpMap.removeLayer(riskLayer); riskLayer = null; }
+          if (stormMark) { mvrpMap.removeLayer(stormMark); stormMark = null; }
+
+          // ── Marching Squares filled contour polygons ──
+          // 1. Map the risks[] array onto a 2-D grid, apply 2-pass box blur so
+          //    adjacent grid cells blend smoothly (organic contour edges).
+          // 2. Run Marching Squares at each tier threshold to get closed rings.
+          // 3. Render each ring as a Leaflet L.polygon with fill + stroke outline,
+          //    painting lowest → highest so inner zones sit on top of outer.
+
+          const GLAT0  = 24, GLON0 = -125;
+          const GLAT_N = Math.round((50  - GLAT0) / STEP) + 1;   // 53
+          const GLON_N = Math.round((-65 - GLON0) / STEP) + 1;   // 121
+
+          const g2d = [];
+          for (let r = 0; r < GLAT_N; r++) g2d.push(new Float32Array(GLON_N));
+          gridPts.forEach(([lat, lon], i) => {
+            const r = Math.round((lat - GLAT0) / STEP);
+            const c = Math.round((lon - GLON0) / STEP);
+            if (r >= 0 && r < GLAT_N && c >= 0 && c < GLON_N) g2d[r][c] = risks[i];
+          });
+
+          // 3×3 box blur pass — run twice to approximate a Gaussian.
+          // Keeps the risk envelope tight while smoothing grid-point jitter.
+          function boxBlur(src, nR, nC) {
+            const dst = src.map(row => new Float32Array(row));
+            for (let r = 0; r < nR; r++)
+              for (let c = 0; c < nC; c++) {
+                let s = 0, n = 0;
+                for (let dr = -1; dr <= 1; dr++)
+                  for (let dc = -1; dc <= 1; dc++) {
+                    const rr=r+dr, cc=c+dc;
+                    if (rr>=0&&rr<nR&&cc>=0&&cc<nC) { s+=src[rr][cc]; n++; }
+                  }
+                dst[r][c] = s/n;
+              }
+            return dst;
+          }
+// Record the true computed peak BEFORE blur.
+          // The 0.25° grid is coarser than most eyewalls, so box blur averages
+          // peak cells against zero-value neighbours and can reduce a genuine
+          // 18% peak to ~2%, killing all visible contours.  We rescale after
+          // blurring so the peak is faithfully preserved while the shape stays
+          // smooth.  This is NOT the old "force everything to 93%" hack —
+          // we scale to the actual computed peak, whatever that is.
+          let rawPeak = 0;
+          for (let r = 0; r < GLAT_N; r++)
+            for (let c = 0; c < GLON_N; c++)
+              if (g2d[r][c] > rawPeak) rawPeak = g2d[r][c];
+
+          // Single box-blur pass — smooths sub-grid jitter without smearing
+          // the risk envelope by more than one grid step (~0.5°).
+          let sg = boxBlur(g2d, GLAT_N, GLON_N);
+
+          // Rescale blurred grid so its peak matches the raw computed peak.
+          // e.g. Helene 18.2% raw → blur reduces to ~4% → rescale back to 18.2%
+          // Colour tiers: <15% green, 15-30% yellow, 30-45% orange-yellow, etc.
+          if (rawPeak > 0) {
+            let blurPeak = 0;
+            for (let r = 0; r < GLAT_N; r++)
+              for (let c = 0; c < GLON_N; c++)
+                if (sg[r][c] > blurPeak) blurPeak = sg[r][c];
+            if (blurPeak > 0) {
+              const scale = rawPeak / blurPeak;
+              for (let r = 0; r < GLAT_N; r++)
+                for (let c = 0; c < GLON_N; c++)
+                  sg[r][c] = Math.min(100, sg[r][c] * scale);
+            }
+          }
+
+          // Drop near-zero noise after rescaling.
+          for (let r = 0; r < GLAT_N; r++)
+            for (let c = 0; c < GLON_N; c++)
+              if (sg[r][c] < 1) sg[r][c] = 0;
+
+          // Marching Squares — returns array of closed rings (each = [[row,col]…])
+          // traced at the given threshold value.
+          function marchingSquares(g, nR, nC, thresh) {
+            const segs = [];
+            // Linear interpolation along an edge: fraction from v0 to v1 where value = thresh
+            const li = (v0,v1) => Math.abs(v1-v0)<1e-6 ? 0.5 : Math.max(0,Math.min(1,(thresh-v0)/(v1-v0)));
+
+            for (let r = 0; r < nR-1; r++) {
+              for (let c = 0; c < nC-1; c++) {
+                // Cell corners: SW=bottom-left, SE=bottom-right, NE=top-right, NW=top-left
+                const sw=g[r][c], se=g[r][c+1], ne=g[r+1][c+1], nw=g[r+1][c];
+                const code=(sw>=thresh?1:0)|(se>=thresh?2:0)|(ne>=thresh?4:0)|(nw>=thresh?8:0);
+                if (!code || code===15) continue;
+                // Iso-contour crossing points in [row,col] float coordinates
+                const S=[r,       c+li(sw,se)];  // south edge (between SW and SE)
+                const E=[r+li(se,ne), c+1    ];  // east edge  (between SE and NE)
+                const N=[r+1,     c+li(nw,ne)];  // north edge (between NW and NE)
+                const W=[r+li(sw,nw), c      ];  // west edge  (between SW and NW)
+                const ps=(p,q)=>segs.push([p,q]);
+                switch(code) {
+                  case 1:  ps(S,W); break;
+                  case 2:  ps(E,S); break;
+                  case 3:  ps(E,W); break;
+                  case 4:  ps(N,E); break;
+                  case 5:  ps(S,W); ps(N,E); break;  // saddle: SW and NE isolated
+                  case 6:  ps(N,S); break;
+                  case 7:  ps(N,W); break;
+                  case 8:  ps(W,N); break;
+                  case 9:  ps(S,N); break;
+                  case 10: ps(S,E); ps(W,N); break;  // saddle: SE and NW isolated
+                  case 11: ps(E,N); break;
+                  case 12: ps(W,E); break;
+                  case 13: ps(S,E); break;
+                  case 14: ps(W,S); break;
+                }
+              }
+            }
+
+            // Assemble unordered segments into closed rings via adjacency traversal.
+            // Each contour point appears in exactly 2 segments, so the chain is
+            // unambiguous. Coords are snapped to a fixed-precision string key.
+            const snap = ([r,c]) => `${Math.round(r*1e4)},${Math.round(c*1e4)}`;
+            const nodes = new Map();
+            segs.forEach(([p,q]) => {
+              const kp=snap(p), kq=snap(q);
+              if (!nodes.has(kp)) nodes.set(kp, {pt:p, adj:[]});
+              if (!nodes.has(kq)) nodes.set(kq, {pt:q, adj:[]});
+              nodes.get(kp).adj.push(kq);
+              nodes.get(kq).adj.push(kp);
+            });
+
+            const rings=[], done=new Set();
+            for (const [sK, sN] of nodes) {
+              if (done.has(sK) || sN.adj.length!==2) continue;
+              const ring=[sN.pt]; done.add(sK);
+              let prevK=sK, curK=sN.adj[0];
+              while (curK !== sK) {
+                if (done.has(curK)) break;
+                const n=nodes.get(curK); if (!n) break;
+                ring.push(n.pt); done.add(curK);
+                const nk = n.adj[0]===prevK ? n.adj[1] : n.adj[0];
+                prevK=curK; curK=nk;
+              }
+              if (ring.length >= 3) rings.push(ring);
+            }
+            return rings;
+          }
+
+          // Convert [row,col] grid coords → Leaflet [lat,lon]
+          const toLL = ([r,c]) => [GLAT0 + r*STEP, GLON0 + c*STEP];
+
+          // Chaikin corner-cutting smoothing — each pass replaces every edge
+          // A→B with two new vertices at the 1/4 and 3/4 positions, rounding
+          // the corners without noticeably shrinking the polygon.
+          function chaikin(ring, passes) {
+            let pts = ring.slice();
+            for (let p = 0; p < passes; p++) {
+              const out = [];
+              const n = pts.length;
+              for (let i = 0; i < n; i++) {
+                const [r0, c0] = pts[i];
+                const [r1, c1] = pts[(i + 1) % n];
+                out.push([r0 * 0.75 + r1 * 0.25, c0 * 0.75 + c1 * 0.25]);
+                out.push([r0 * 0.25 + r1 * 0.75, c0 * 0.25 + c1 * 0.75]);
+              }
+              pts = out;
+            }
+            return pts;
+          }
+
+          // Darken a hex colour by factor f for the polygon stroke outline
+          const darken = (hex, f) => {
+            const n=parseInt(hex.slice(1),16);
+            return '#'+[n>>16,(n>>8)&0xff,n&0xff]
+              .map(v=>Math.round(v*f).toString(16).padStart(2,'0')).join('');
+          };
+
+          // Ray-casting point-in-polygon test used to match holes to their
+          // parent outer ring when building annular (donut) polygons.
+          function ptInRing(pt, ring) {
+            let inside = false;
+            const [pr, pc] = pt;
+            for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+              const [ri, ci] = ring[i], [rj, cj] = ring[j];
+              if (((ci > pc) !== (cj > pc)) &&
+                  (pr < (rj - ri) * (pc - ci) / (cj - ci) + ri))
+                inside = !inside;
+            }
+            return inside;
+          }
+
+          // Pre-compute contour rings at every tier boundary.
+          // loThresholds[i] = lower edge of TIERS[i] (or 5 for the first tier).
+          // Appending the sentinel (hi of last tier) gives the innermost core ring.
+          const loThresholds = TIERS.map((t, i) => i === 0 ? 5 : t.lo);
+          loThresholds.push(TIERS[TIERS.length - 1].hi);
+          const allRings = loThresholds.map(th =>
+            marchingSquares(sg, GLAT_N, GLON_N, th));
+
+          // L.layerGroup holds all tier polygons.
+          const lg = L.layerGroup().addTo(mvrpMap);
+
+          // Render each tier as an ANNULAR (donut) polygon:
+          //   outer ring = contour at tier.lo
+          //   holes      = contour rings at tier.hi that lie inside the outer ring
+          // This guarantees every map point is covered by AT MOST ONE tier fill,
+          // completely eliminating opacity-stacking at the storm centre.
+          for (let ti = 0; ti < TIERS.length; ti++) {
+            const tier   = TIERS[ti];
+            const oRings = allRings[ti];      // outer boundary rings
+            const iRings = allRings[ti + 1];  // hole rings (next tier inward)
+
+            oRings.forEach(outerRing => {
+              if (outerRing.length < 3) return;
+              const smoothedOuter = chaikin(outerRing, 3);
+              const outerLL = smoothedOuter.map(toLL);
+              // Only include inner rings whose first point is inside the unsmoothed
+              // outer ring (ptInRing uses grid coords before Chaikin expansion).
+              const holes = iRings
+                .filter(ir => ir.length >= 3 && ptInRing(ir[0], outerRing))
+                .map(ir => chaikin(ir, 3).map(toLL));
+              L.polygon([outerLL, ...holes], {
+                color:        darken(tier.col, 0.55),
+                weight:       1.5,
+                opacity:      1,
+                fillColor:    tier.col,
+                fillOpacity:  0.45,
+                smoothFactor: 1,
+              }).addTo(lg);
+              if (tier.hatch) {
+                L.polygon([outerLL, ...holes], {
+                  stroke: false, fillColor: '#000',
+                  fillOpacity: 0.15, smoothFactor: 1,
+                }).addTo(lg);
+              }
+            });
+          }
+
+          riskLayer = lg;
+
+          const icon = L.divIcon({
+            html: '<div style="width:14px;height:14px;border-radius:50%;background:#ff3333;border:2px solid #fff;box-shadow:0 0 10px #ff3333"></div>',
+            iconSize: [14,14], iconAnchor: [7,7], className: '',
+          });
+          stormMark = L.marker([sLat, sLon], { icon })
+            .bindTooltip(`<strong>${storm.name} ${storm.year}</strong><br>${category(wind)}<br>${wind} kt · Eye ~${eyeDiam} km`, { permanent: false })
+            .addTo(mvrpMap);
+
+          const cellCount = risks.filter(r => r >= 5).length;
+          statusEl.className = 'mvrp-status';
+          statusEl.textContent = `${storm.name} — ${cellCount} cells ≥5% risk`;
+
+          const infoBar  = document.getElementById('mvrp-info-bar');
+          const catBadge = document.getElementById('mvrp-cat-badge');
+          const peakEl   = document.getElementById('mvrp-peak-val');
+          catBadge.textContent  = `${category(wind)} · ${storm.name} ${storm.year}`;
+          peakEl.textContent    = `${peak.toFixed(1)}%`;
+          peakEl.style.color    = riskTier(peak).col;
+          infoBar.style.display = 'flex';
+
+          mvrpMap.setView([sLat, sLon], 4);
+        }, 20);
+      }
+
+      window.mvrpInit = function () {
+        if (mvrpInited) return;
+        mvrpInited = true;
+        mvrpMap = L.map('mvrp-map', { center: [35, -92], zoom: 4 });
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+          maxZoom: 9,
+        }).addTo(mvrpMap);
+        // Populate historical cards immediately, live storms async
+        HISTORICAL.forEach(s => renderStormCard(document.getElementById('mvrp-hist-cards'), s));
+        fetchLiveStorms();
+      };
+
+      // ── Back button ──
+      document.getElementById('mvrp-back-btn').addEventListener('click', function () {
+        document.getElementById('mvrp-view').classList.add('hidden');
+        document.getElementById('model-explorer-view').classList.remove('hidden');
+      });
+    })();
+
+    // ── AVC back button ──
+    document.getElementById('avc-back-btn').addEventListener('click', function () {
+      document.getElementById('avc-view').classList.add('hidden');
+      document.getElementById('model-explorer-view').classList.remove('hidden');
+    });
+
+    // ── AVC (Aurora Visibility Calculator) ──
+    let avcChart = null;
+    let avcLoaded = false;
+    let avcLat = 44.4, avcLon = -72.0, avcCloudCover = 0, avcBz = 0;
+
+    function avcInit() {
+      if (avcLoaded) return;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => { avcLat = pos.coords.latitude; avcLon = pos.coords.longitude; avcStartLoad(); },
+          ()  => { avcStartLoad(); }
+        );
+      } else { avcStartLoad(); }
+    }
+
+    function avcStartLoad() {
+      avcFetchLocation();
+      avcFetchWeather();
+      avcLoadData();
+    }
+
+    async function avcFetchLocation() {
+      const el = document.getElementById('avc-loc');
+      el.textContent = `(${avcLat.toFixed(2)}°N, ${Math.abs(avcLon).toFixed(2)}°W)`;
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${avcLat}&lon=${avcLon}&zoom=10&addressdetails=1`, { headers: { 'Accept-Language': 'en' } });
+        if (!r.ok) return;
+        const d = await r.json();
+        if (d.address) {
+          const a = d.address;
+          let city = a.city || a.town || a.village || a.county || d.name || 'Unknown';
+          let state = a.state || '';
+          let loc = city + (state && state !== city ? `, ${state}` : '');
+          el.textContent = `${loc} (${avcLat.toFixed(2)}°N, ${Math.abs(avcLon).toFixed(2)}°W)`;
+        }
+      } catch(e) {}
+    }
+
+    async function avcFetchWeather() {
+      try {
+        const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${avcLat}&longitude=${avcLon}&current=cloud_cover&forecast_days=1`);
+        if (!r.ok) return;
+        const d = await r.json();
+        avcCloudCover = d.current.cloud_cover || 0;
+        const desc = avcCloudDesc(avcCloudCover);
+        document.getElementById('avc-cloud').textContent = `${avcCloudCover}% ${desc}`;
+      } catch(e) {
+        document.getElementById('avc-cloud').textContent = '-- (unavailable)';
+      }
+    }
+
+    function avcCloudDesc(c) {
+      if (c <= 10) return '(Clear)';
+      if (c <= 25) return '(Mostly Clear)';
+      if (c <= 50) return '(Partly Cloudy)';
+      if (c <= 75) return '(Mostly Cloudy)';
+      if (c <= 90) return '(Overcast)';
+      return '(Dense Overcast)';
+    }
+
+    async function avcLoadData() {
+      const loadEl    = document.getElementById('avc-loading');
+      const errEl     = document.getElementById('avc-error');
+      const contentEl = document.getElementById('avc-content');
+      try {
+        loadEl.style.display = 'block';
+        errEl.style.display  = 'none';
+
+        const [kpRes, magRes] = await Promise.all([
+          fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'),
+          fetch('https://services.swpc.noaa.gov/json/rtsw/rtsw_mag_1m.json')
+        ]);
+        if (!kpRes.ok || !magRes.ok) throw new Error('NOAA fetch failed');
+
+        // noaa-planetary-k-index.json returns [[header], [time_tag, kp, ...], ...]
+        const kpRaw  = await kpRes.json();
+        const kpRows = kpRaw.slice(1); // drop header row
+        const magData = await magRes.json();
+
+        // Bz
+        const latestMag = magData[magData.length - 1];
+        avcBz = -(Array.isArray(latestMag?.bz_gsm) ? latestMag.bz_gsm[0] : (latestMag?.bz_gsm || 0));
+        const bzEl = document.getElementById('avc-bz');
+        bzEl.textContent = avcBz.toFixed(1) + ' nT';
+        bzEl.style.color = avcBz < 0 ? '#ff4d4d' : '#52d452';
+
+        // Build 3-hourly Kp chart for last 24 h (last 8 entries)
+        const now = new Date();
+        const chartRows  = kpRows.slice(-8);
+        const kpIndexData = chartRows.map(r => Math.round(parseFloat(r[1]) * 10) / 10);
+        const timeLabels  = chartRows.map(r => r[0].split(' ')[1].substring(0, 5));
+
+        const currentKp = parseFloat(kpRows[kpRows.length - 1]?.[1] || 0);
+
+        // Update Kp display
+        const kpEl = document.getElementById('avc-kp');
+        kpEl.textContent = currentKp.toFixed(1);
+
+        // Rating
+        const ratingEl = document.getElementById('avc-rating');
+        let rating = 'Unfavorable', color = '#52d452';
+        if (currentKp <= 1 && avcCloudCover >= 80) {
+          rating = "Don't even look — just go home";
+          color = '#999';
+        } else {
+          const bzBoost = avcBz < -5 ? 1.5 : avcBz < -3 ? 1.2 : avcBz < 0 ? 1.0 : 0.7;
+          const effKp = currentKp * bzBoost;
+          const lat = Math.abs(avcLat);
+          if (lat >= 60) {
+            if (effKp >= 8) { rating='Spectacular'; color='#8b0000'; }
+            else if (effKp >= 5) { rating='Excellent — Aurora Likely'; color='#ffd500'; }
+            else if (effKp >= 3) { rating='Good — May Be Visible'; color='#52d452'; }
+          } else if (lat >= 50) {
+            if (effKp >= 8) { rating='Excellent'; color='#8b0000'; }
+            else if (effKp >= 5) { rating='Moderate — May Be Visible'; color='#ff9500'; }
+            else if (effKp >= 4) { rating='Fair — Unlikely'; color='#ffd500'; }
+          } else if (lat >= 40) {
+            if (effKp >= 8) { rating='Excellent — Likely Visible'; color='#8b0000'; }
+            else if (effKp >= 6) { rating='Good — May Be Visible'; color='#ff4444'; }
+            else if (effKp >= 4) { rating='Fair — Unlikely'; color='#ff9500'; }
+          } else if (lat >= 30) {
+            if (effKp >= 9) { rating='Fair — May Be Visible'; color='#8b0000'; }
+            else if (effKp >= 7) { rating='Very Poor — Unlikely'; color='#ff4444'; }
+          } else {
+            if (effKp >= 9) { rating='Very Poor — May Be Visible'; color='#8b0000'; }
+            else { rating='Extremely Unfavorable'; }
+          }
+          // cloud penalty
+          if (avcCloudCover >= 80) rating = rating.replace('Excellent','Fair').replace('Good','Poor').replace('Moderate','Very Poor').replace('Likely','Unlikely');
+          else if (avcCloudCover >= 60) rating = rating.replace('Excellent','Moderate').replace('Good','Fair');
+        }
+        ratingEl.textContent = rating;
+        ratingEl.style.color = color;
+        kpEl.style.color = color;
+
+        // Highlight Kp scale
+        document.querySelectorAll('.avc-kp-cell').forEach(cell => {
+          cell.classList.remove('scale-active');
+          const mn = parseFloat(cell.dataset.min), mx = parseFloat(cell.dataset.max);
+          if (currentKp >= mn && currentKp < mx) cell.classList.add('scale-active');
+        });
+
+        // Chart
+        if (avcChart) avcChart.destroy();
+        const tinyScreen = window.innerWidth <= 480;
+        const ctx = document.getElementById('avc-chart').getContext('2d');
+        avcChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: timeLabels,
+            datasets: [{ label: 'Kp Index', data: kpIndexData, borderColor: '#b07ee0', backgroundColor: 'rgba(176,126,224,0.1)', borderWidth: 2, tension: 0.3, fill: true, pointRadius: tinyScreen ? 2 : 3, pointBackgroundColor: '#b07ee0', pointBorderColor: 'var(--teal)' }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#e8e8e8', font: { size: tinyScreen ? 8 : 11 } } } },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.07)' }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: tinyScreen ? 7 : 10 }, maxRotation: 45 } },
+              y: { beginAtZero: true, max: 9, grid: { color: 'rgba(255,255,255,0.07)' }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: tinyScreen ? 7 : 10 } }, title: { display: true, text: 'Kp Index', color: '#e8e8e8', font: { size: tinyScreen ? 8 : 11 } } }
+            }
+          }
+        });
+
+        document.getElementById('avc-update-time').textContent = now.toISOString().split('T')[1].substring(0,8) + ' UTC';
+        contentEl.style.display = 'block';
+        loadEl.style.display = 'none';
+        avcLoaded = true;
+
+      } catch(err) {
+        errEl.textContent = 'Error loading data: ' + err.message;
+        errEl.style.display = 'block';
+        loadEl.style.display = 'none';
+      }
+    }
 
     /* ── Photo Carousel ── */
     (function () {
