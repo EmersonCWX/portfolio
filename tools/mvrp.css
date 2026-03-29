@@ -1,0 +1,251 @@
+﻿    /* ── MVRP view ── */
+    #mvrp-view {
+      width: min(1020px, 97vw);
+      padding: 48px 24px 120px;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    .mvrp-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      max-width: 980px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    @media (max-width: 700px) {
+      .mvrp-layout { grid-template-columns: 1fr; }
+    }
+
+    .mvrp-panel {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(139,32,192,0.25);
+      border-radius: 14px;
+      padding: 22px 18px;
+      backdrop-filter: blur(6px);
+    }
+
+    .mvrp-panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      color: var(--teal);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(139,32,192,0.3);
+    }
+
+    .mvrp-storm-card {
+      background: rgba(139,32,192,0.07);
+      border: 1px solid rgba(139,32,192,0.18);
+      border-left: 3px solid var(--teal);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s, border-left-color 0.2s;
+    }
+    .mvrp-storm-card:hover { background: rgba(139,32,192,0.16); border-left-color: #d070ff; }
+    .mvrp-storm-card.active { background: rgba(139,32,192,0.24); border-left-color: #d070ff; box-shadow: 0 0 0 1px rgba(208,112,255,0.3); }
+    .mvrp-storm-card-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #e8e8e8;
+      margin-bottom: 2px;
+    }
+    .mvrp-storm-card-tag {
+      font-size: 10px;
+      color: var(--teal);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 5px;
+    }
+    .mvrp-storm-card-stats {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .mvrp-storm-stat {
+      font-size: 9px;
+      color: rgba(255,255,255,0.55);
+      background: rgba(255,255,255,0.05);
+      border-radius: 3px;
+      padding: 2px 5px;
+    }
+    .mvrp-storm-card-note {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .mvrp-live-badge {
+      display: inline-block;
+      background: #22bb33;
+      color: #000;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      border-radius: 3px;
+      padding: 1px 5px;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .mvrp-live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      display: inline-block;
+      transition: background 0.4s;
+    }
+    .mvrp-no-storms {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 4px 0 10px;
+    }
+    .mvrp-info-bar {
+      display: none;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .mvrp-back-btn {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 5px 16px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .mvrp-back-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+    .mvrp-map-wrap {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(139,32,192,0.2);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      min-height: 360px;
+    }
+
+    #mvrp-map { width: 100%; height: 420px; }
+
+    .mvrp-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 8px 0 4px;
+      min-height: 20px;
+    }
+    .mvrp-status.running { color: var(--teal); }
+    .mvrp-status.error   { color: #ec3754; }
+
+    /* ── MVRP NWP convective parameter chips (HRRR / RRFS) ── */
+    .mvrp-nwp-row {
+      display: none;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+      min-height: 24px;
+    }
+    .mvrp-nwp-src {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--teal);
+      flex-shrink: 0;
+    }
+    .mvrp-nwp-chip {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 5px;
+      background: rgba(139,32,192,0.09);
+      border: 1px solid rgba(139,32,192,0.28);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 11px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .mvrp-nwp-lbl {
+      font-size: 9.5px;
+      opacity: 0.6;
+      letter-spacing: 0.04em;
+    }
+
+    /* Legend */
+    .mvrp-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .mvrp-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .mvrp-legend-swatch {
+      width: 18px; height: 12px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .mvrp-legend-swatch.hatched {
+      background-image: repeating-linear-gradient(
+        45deg, transparent, transparent 3px,
+        rgba(0,0,0,0.45) 3px, rgba(0,0,0,0.45) 5px
+      );
+    }
+
+    /* Category badge */
+    .mvrp-cat-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      border: 1px solid rgba(139,32,192,0.4);
+      background: rgba(139,32,192,0.12);
+      color: var(--teal);
+    }
+
+    .mvrp-peak-risk {
+      font-size: 26px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      margin: 6px 0 2px;
+    }
+
+    /* Leaflet dark tooltip override */
+    .mvrp-tip {
+      background: rgba(10,10,18,0.92) !important;
+      border: 1px solid rgba(139,32,192,0.5) !important;
+      color: #e8e8e8 !important;
+      font-size: 12px !important;
+      border-radius: 6px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+    }
+    .mvrp-tip::before { display: none !important; }
+    /* Leaflet attribution dark */
+    #mvrp-map .leaflet-control-attribution {
+      background: rgba(0,0,0,0.6) !important;
+      color: rgba(255,255,255,0.4) !important;
+      font-size: 9px !important;
+    }
+    .mvrp-risk-img { filter: blur(0.5px); }  /* subtle anti-alias only */
+
+    /* ══════════════════════════════════════
