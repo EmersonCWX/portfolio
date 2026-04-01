@@ -965,6 +965,259 @@
       #nwp-map { height: 340px; }
       .nwp-windy-frame { height: 340px; }
     }
+
+    /* ── Live Reconnaissance ──────────────────────────────────────────── */
+    .lr-header {
+      text-align: center;
+      padding-bottom: 18px;
+    }
+    .lr-back-btn {
+      display: block !important;
+      margin: 0 auto 14px !important;
+    }
+    .lr-status-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #1a1d22;
+      border: 1px solid #2a2d33;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .lr-phase-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      padding: 4px 14px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      background: #242730;
+      color: #666;
+      border: 1px solid #3a3f45;
+      white-space: nowrap;
+    }
+    .lr-phase-badge.lr-phase-enroute {
+      background: rgba(76,175,80,0.13);
+      color: #4caf50;
+      border-color: rgba(76,175,80,0.4);
+    }
+    .lr-phase-badge.lr-phase-in-storm {
+      background: rgba(244,67,54,0.13);
+      color: #f44336;
+      border-color: rgba(244,67,54,0.45);
+      animation: lr-pulse 1.4s ease infinite;
+    }
+    .lr-phase-badge.lr-phase-returning {
+      background: rgba(255,152,0,0.13);
+      color: #ff9800;
+      border-color: rgba(255,152,0,0.4);
+    }
+    @keyframes lr-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(244,67,54,0.35); }
+      50%      { box-shadow: 0 0 0 6px rgba(244,67,54,0); }
+    }
+    .lr-flight-meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex: 1;
+    }
+    .lr-ac-id {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #a0b0c0;
+      font-family: monospace;
+    }
+    .lr-obs-time {
+      font-size: 0.75rem;
+      color: #555;
+      font-family: monospace;
+    }
+    .lr-refresh-btn {
+      margin-left: auto;
+      background: #242730;
+      border: 1px solid #3a3f45;
+      color: #a0b0c0;
+      padding: 5px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .lr-refresh-btn:hover { background: #2e333b; }
+    .lr-status-msg {
+      color: #666;
+      font-style: italic;
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 40px 0;
+    }
+    .lr-main-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .lr-summary-box {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .lr-sum-item {
+      background: #1a1d22;
+      border: 1px solid #2a2d33;
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+    .lr-sum-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .lr-sum-sublabel {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #555;
+    }
+    .lr-sum-value {
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: monospace;
+      color: #e0e0e0;
+      letter-spacing: 0.02em;
+    }
+    .lr-sum-sfmr { color: #4fc3f7; }
+    .lr-sum-fl   { color: #4caf50; }
+    @media (max-width: 900px) {
+      .lr-summary-box { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 700px) {
+      .lr-summary-box { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 420px) {
+      .lr-summary-box { grid-template-columns: 1fr; }
+    }
+    .lr-mission-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .lr-mission-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      padding: 7px 14px;
+      background: #1a1d22;
+      border: 1px solid #2a2d33;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .lr-mission-btn:hover {
+      background: #22262d;
+      border-color: #3a3f45;
+    }
+    .lr-mission-btn--active {
+      background: #0d2b1a !important;
+      border-color: var(--teal) !important;
+    }
+    .lr-mission-ac {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: #d0d0d0;
+      text-transform: uppercase;
+    }
+    .lr-mission-btn--active .lr-mission-ac { color: var(--teal); }
+    .lr-mission-time {
+      font-size: 0.65rem;
+      font-family: monospace;
+      color: #555;
+    }
+    .lr-mission-btn--active .lr-mission-time { color: #6dbf8a; }
+    .lr-map-panel { position: relative; }
+    .lr-map {
+      height: 450px;
+      border-radius: 8px;
+      border: 1px solid #2a2d33;
+      overflow: hidden;
+      background: #12151a;
+    }
+    .lr-map-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 7px;
+      font-size: 0.68rem;
+      color: #888;
+    }
+    .lr-legend-item { display: flex; align-items: center; gap: 4px; }
+    .lr-legend-enroute::before  { content:'—'; color:#4caf50; font-weight:900; margin-right:3px; }
+    .lr-legend-in-storm::before { content:'—'; color:#f44336; font-weight:900; margin-right:3px; }
+    .lr-legend-returning::before{ content:'—'; color:#ff9800; font-weight:900; margin-right:3px; }
+    .lr-legend-ring::before     { content:'○'; color:rgba(244,67,54,0.6); margin-right:3px; }
+    .lr-legend-ring2::before    { content:'○'; color:rgba(255,152,0,0.5); margin-right:3px; }
+    .lr-side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .lr-card {
+      background: #1a1d22;
+      border: 1px solid #2a2d33;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .lr-card-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #555;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .lr-graph-legend-key {
+      font-size: 0.63rem;
+      font-weight: 400;
+      color: #444;
+      margin-left: auto;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .lr-obs-table { width: 100%; border-collapse: collapse; }
+    .lr-obs-table td { padding: 4px 2px; font-size: 0.78rem; }
+    .lr-obs-table td:first-child { color: #555; font-size: 0.7rem; width: 115px; }
+    .lr-obs-table td:last-child  { color: #e8e8e8; font-family: monospace; font-weight: 700; }
+    .lr-obs-table td:last-child .lr-muted { color: #444; font-weight: 400; }
+    .lr-graph-card { flex: 1; }
+    .lr-wind-canvas { width: 100%; height: 155px; display: block; }
+    .lr-subtools {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    @media (max-width: 700px) {
+      .lr-main-layout  { grid-template-columns: 1fr; }
+      .lr-map          { height: 290px; }
+      .lr-subtools     { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -1362,9 +1615,122 @@
 
   </div><!-- end #nwp-view -->
 
+  <!-- ── Live Reconnaissance Dashboard ── -->
+  <div id="live-recon-view" class="view hidden">
+
+    <!-- Centered header -->
+    <div class="lr-header">
+      <button class="mvrp-back-btn lr-back-btn" id="live-recon-back-btn">&#8592; Model Explorer</button>
+      <h2 class="proj-title">Live Reconnaissance</h2>
+      <p class="proj-subtitle">NOAA &amp; USAF Hurricane Hunter &mdash; Real-Time Flight Data</p>
+    </div>
+
+    <!-- Mission status strip -->
+    <div class="lr-status-strip">
+      <span class="lr-phase-badge" id="lr-phase-badge">──</span>
+      <div class="lr-flight-meta">
+        <span class="lr-ac-id" id="lr-ac-id">N/A</span>
+        <span class="lr-obs-time" id="lr-obs-time">──Z</span>
+      </div>
+      <button class="lr-refresh-btn" id="lr-refresh-btn">&#8635; Refresh</button>
+    </div>
+
+    <!-- Mission selector bar -->
+    <div class="lr-mission-bar" id="lr-mission-bar" style="display:none"></div>
+
+    <!-- Status message when no data -->
+    <div class="lr-status-msg" id="lr-status-msg">Connecting to NOAA&hellip;</div>
+
+    <!-- Mission summary box -->
+    <div class="lr-summary-box" id="lr-summary-box" style="display:none">
+      <div class="lr-sum-item">
+        <div class="lr-sum-label">Last Ping</div>
+        <div class="lr-sum-value" id="lr-sum-ping">&mdash;</div>
+      </div>
+      <div class="lr-sum-item">
+        <div class="lr-sum-label">Current SFMR</div>
+        <div class="lr-sum-value lr-sum-sfmr" id="lr-sum-sfmr-cur">&mdash;</div>
+      </div>
+      <div class="lr-sum-item">
+        <div class="lr-sum-label">Peak SFMR Winds</div>
+        <div class="lr-sum-value lr-sum-sfmr" id="lr-sum-sfmr">&mdash;</div>
+      </div>
+      <div class="lr-sum-item">
+        <div class="lr-sum-label">Peak FL Winds</div>
+        <div class="lr-sum-value lr-sum-fl" id="lr-sum-fl">&mdash;</div>
+      </div>
+      <div class="lr-sum-item">
+        <div class="lr-sum-label">Flight Altitude</div>
+        <div class="lr-sum-value" id="lr-sum-alt">&mdash;</div>
+      </div>
+    </div>
+    <div class="lr-main-layout" id="lr-main-layout" style="display:none">
+
+      <!-- Map panel -->
+      <div class="lr-map-panel">
+        <div id="lr-map" class="lr-map"></div>
+        <div class="lr-map-legend">
+          <span class="lr-legend-item lr-legend-enroute">Enroute</span>
+          <span class="lr-legend-item lr-legend-in-storm">In Storm</span>
+          <span class="lr-legend-item lr-legend-returning">Returning</span>
+          <span class="lr-legend-item lr-legend-ring">── 100 nm</span>
+          <span class="lr-legend-item lr-legend-ring2">── 200 nm</span>
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="lr-side-panel">
+
+        <!-- Current obs -->
+        <div class="lr-card">
+          <div class="lr-card-title">&#9992;&nbsp; Current Reading</div>
+          <table class="lr-obs-table">
+            <tbody id="lr-obs-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Flight-level wind speed graph ("G-meter") -->
+        <div class="lr-card lr-graph-card">
+          <div class="lr-card-title">
+            Flight Level Wind Speed
+            <span class="lr-graph-legend-key">
+              <span style="color:#4caf50;">─</span>&nbsp;FL Wind&nbsp;&nbsp;
+              <span style="color:#ff6666;">- -</span>&nbsp;Peak Gust
+            </span>
+          </div>
+          <canvas id="lr-wind-canvas" class="lr-wind-canvas"></canvas>
+        </div>
+
+      </div>
+    </div><!-- end .lr-main-layout -->
+
+    <!-- Sub-tool quick-launch cards -->
+    <div class="lr-subtools">
+      <div class="me-card me-card-clickable" id="live-recon-tdr-card">
+        <div class="me-card-header">
+          <span class="me-desig">TDR</span>
+          <span class="me-badge me-badge-custom">Custom</span>
+        </div>
+        <div class="me-nick">Tail Doppler Radar</div>
+        <div class="me-notes">Real-time Tail Doppler Radar imagery from NOAA WP-3D aircraft during active reconnaissance missions.</div>
+        <div style="margin-top:10px;font-size:11px;font-weight:700;letter-spacing:0.05em;color:var(--teal)">Launch &#8594;</div>
+      </div>
+      <div class="me-card me-card-clickable" id="live-recon-dsa-card">
+        <div class="me-card-header">
+          <span class="me-desig">DSA</span>
+          <span class="me-badge me-badge-custom">Custom</span>
+        </div>
+        <div class="me-nick">Dropsonde Analyzer</div>
+        <div class="me-notes">Real-time NOAA &amp; 53rd WRS dropsonde soundings with Skew-T/Log-P diagrams.</div>
+        <div style="margin-top:10px;font-size:11px;font-weight:700;letter-spacing:0.05em;color:var(--teal)">Launch &#8594;</div>
+      </div>
+    </div>
+
+  </div><!-- end #live-recon-view -->
+
   <!-- ── Realtime TDR & C Band ── -->
   <div id="tdr-view" class="view hidden">
-    <button class="mvrp-back-btn" id="tdr-back-btn" onclick="document.getElementById('tdr-view').classList.add('hidden');document.getElementById('model-explorer-view').classList.remove('hidden');">&#8592; Model Explorer</button>
+    <button class="mvrp-back-btn" id="tdr-back-btn" onclick="if(window._showLiveRecon)window._showLiveRecon();">&#8592; Live Reconnaissance</button>
     <h2 class="proj-title">Realtime TDR</h2>
     <p class="proj-subtitle">NOAA Hurricane Hunter Tail Doppler Radar</p>
 
@@ -1421,7 +1787,7 @@
 
   <!-- ── Dropsonde Sounding Analyzer ── -->
   <div id="dsa-view" class="view hidden">
-    <button class="mvrp-back-btn" id="dsa-back-btn">&#8592; Model Explorer</button>
+    <button class="mvrp-back-btn" id="dsa-back-btn">&#8592; Live Reconnaissance</button>
     <h2 class="proj-title">Dropsonde Analyzer</h2>
     <p class="proj-subtitle">NHC Hurricane Reconnaissance Dropsonde Soundings &mdash; NOAA &amp; USAF</p>
 
@@ -1634,7 +2000,8 @@
       const nwpView            = document.getElementById('nwp-view');
       const dsaView            = document.getElementById('dsa-view');
       const tdrView            = document.getElementById('tdr-view');
-      const allViews = [profileView, projectsView, portfolioView, modelExplorerView, avcView, mvrpView, mrmsView, nwpView, dsaView, tdrView];
+      const liveReconView      = document.getElementById('live-recon-view');
+      const allViews = [profileView, projectsView, portfolioView, modelExplorerView, avcView, mvrpView, mrmsView, nwpView, dsaView, tdrView, liveReconView];
       const tagline = document.getElementById('bottom-tagline');
       const scrollRoot = document.getElementById('scroll-root');
 
@@ -1650,8 +2017,9 @@
         if (show === mvrpView && window.mvrpInit) window.mvrpInit();
         if (show === mrmsView) mrmsInit();
         if (show === nwpView)  nwpInit();
-        if (show === dsaView)    dsaInit();
-        if (show === tdrView)    tdrInit();
+        if (show === dsaView)        dsaInit();
+        if (show === tdrView)        tdrInit();
+        if (show === liveReconView && window.liveReconInit) liveReconInit();
       }
 
       document.getElementById('projects-btn').addEventListener('click', function (e) {
@@ -1672,8 +2040,19 @@
       window._showAVC       = function () { showView(avcView); };
       window._showMVRP      = function () { showView(mvrpView); };
       window._showMRMS      = function () { showView(mrmsView); };
-      window._showDropsonde = function () { showView(dsaView); };
-      window._showTDR       = function () { showView(tdrView); };
+      window._showDropsonde  = function () { showView(dsaView); };
+      window._showTDR        = function () { showView(tdrView); };
+      window._showLiveRecon  = function () { showView(liveReconView); };
+
+      document.getElementById('live-recon-back-btn').addEventListener('click', function () {
+        showView(modelExplorerView);
+      });
+      document.getElementById('live-recon-tdr-card').addEventListener('click', function () {
+        showView(tdrView);
+      });
+      document.getElementById('live-recon-dsa-card').addEventListener('click', function () {
+        showView(dsaView);
+      });
       window._showNWP  = function (model) {
         showView(nwpView);
         if (model && model !== 'hrrr') {
@@ -1697,8 +2076,7 @@
         { cat: 'Custom',    desig: 'AVC',   nick: 'Aurora Visibility Calculator',    dev: 'Sabr3 / VTSU', res: 'N/A',    horizon: 'Real-time', cycle: 'On demand',    notes: 'Predicts aurora borealis visibility using real-time geomagnetic and solar wind data with location-aware forecasting', action: 'avc' },
         { cat: 'Custom',    desig: 'MV-REP', nick: 'Mesovortex Risk Evaluation Parameter', dev: 'Sabr3 / VTSU', res: '~3 km',  horizon: '6-12 hr',   cycle: 'Experimental', notes: 'Next-generation parameter targeting mesovortex formation within landfalling major hurricanes; Meso-Vortice Project', action: 'mvrp' },
         { cat: 'Custom',    desig: 'MRMS',   nick: 'Vermont MRMS Viewer',                  dev: 'Sabr3 / VTSU', res: '~1 km',  horizon: 'Real-time', cycle: '~2 min',       notes: 'Live Multi-Radar/Multi-Sensor System composite reflectivity, echo tops and QPE for the Northeast CONUS.', action: 'mrms' },
-        { cat: 'Custom',    desig: 'DSA',    nick: 'Dropsonde Analyzer',                   dev: 'Sabr3 / VTSU', res: '',        horizon: 'Real-time',    cycle: 'Real-time',  notes: 'Visualizes NOAA & 53rd WRS hurricane hunter dropsonde data in real-time', action: 'dropsonde' },
-        { cat: 'Custom',    desig: 'TDR',    nick: 'Realtime TDR & C Band',                dev: 'Sabr3 / VTSU', res: '~150 m',  horizon: 'Real-time',    cycle: 'Real-time',  notes: 'Real-time Tail Doppler Radar and C-Band imagery from NOAA WP-3D aircraft during active reconnaissance missions.', action: 'tdr' },
+        { cat: 'Custom',    desig: 'RECONN', nick: 'Live Reconnaissance',                   dev: 'Sabr3 / VTSU', res: '~150 m',  horizon: 'Real-time',    cycle: 'Real-time',  notes: 'Live NOAA & USAF Hurricane Hunter data — Tail Doppler Radar imagery and dropsonde soundings from active missions.', action: 'live-recon' },
       ];
 
       const grid = document.getElementById('me-grid');
@@ -1732,6 +2110,7 @@
               if (m.action === 'nwp-hrrr')   { window._showNWP('hrrr'); }
               if (m.action === 'dropsonde')  { window._showDropsonde && window._showDropsonde(); }
               if (m.action === 'tdr')        { window._showTDR && window._showTDR(); }
+              if (m.action === 'live-recon') { window._showLiveRecon && window._showLiveRecon(); }
             });
           }
           grid.appendChild(card);
@@ -1783,6 +2162,7 @@
   <script src="tools/avc.js"></script>
   <script src="tools/dsa.js"></script>
   <script src="tools/tdr.js"></script>
+  <script src="tools/liveRecon.js"></script>
   <script src="tools/mrms.js"></script>
   <script src="tools/nwp.js"></script>
 

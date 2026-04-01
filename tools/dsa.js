@@ -64,8 +64,7 @@
 
       // ── Back button ───────────────────────────────────────────
       backBtn.addEventListener('click', function () {
-        document.getElementById('dsa-view').classList.add('hidden');
-        document.getElementById('model-explorer-view').classList.remove('hidden');
+        if (window._showLiveRecon) window._showLiveRecon();
       });
 
       // ── Mode toggle ───────────────────────────────────────────
