@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="tools/mrms.css" />
   <link rel="stylesheet" href="tools/dsa.css" />
   <link rel="stylesheet" href="tools/nwp.css" />
+  <link rel="stylesheet" href="tools/sounding.css" />
   <style>
     *, *::before, *::after {
       margin: 0;
@@ -762,7 +763,7 @@
     }
 
     /* ══════════════════════════════════════
-       MOBILE — ≤ 600px
+       MOBILE  ≤ 600px
        ══════════════════════════════════════ */
     @media (max-width: 600px) {
 
@@ -830,7 +831,8 @@
       #avc-view,
       #mvrp-view,
       #mrms-view,
-      #nwp-view {
+      #nwp-view,
+      #sounding-view {
         width: 100vw;
         max-width: 100vw;
         padding-left: 14px;
@@ -927,7 +929,7 @@
     }
 
     /* ══════════════════════════════════════
-       SMALL-MID — 601–820px
+       SMALL-MID  601–820px
        ══════════════════════════════════════ */
     @media (min-width: 601px) and (max-width: 820px) {
       #scroll-root {
@@ -942,7 +944,8 @@
       #avc-view,
       #mvrp-view,
       #mrms-view,
-      #nwp-view {
+      #nwp-view,
+      #sounding-view {
         max-height: none;
         overflow-y: visible;
         padding-bottom: 130px;
@@ -1165,9 +1168,9 @@
       color: #888;
     }
     .lr-legend-item { display: flex; align-items: center; gap: 4px; }
-    .lr-legend-enroute::before  { content:'—'; color:#4caf50; font-weight:900; margin-right:3px; }
-    .lr-legend-in-storm::before { content:'—'; color:#f44336; font-weight:900; margin-right:3px; }
-    .lr-legend-returning::before{ content:'—'; color:#ff9800; font-weight:900; margin-right:3px; }
+    .lr-legend-enroute::before  { content:''; color:#4caf50; font-weight:900; margin-right:3px; }
+    .lr-legend-in-storm::before { content:''; color:#f44336; font-weight:900; margin-right:3px; }
+    .lr-legend-returning::before{ content:''; color:#ff9800; font-weight:900; margin-right:3px; }
     .lr-legend-ring::before     { content:'○'; color:rgba(244,67,54,0.6); margin-right:3px; }
     .lr-legend-ring2::before    { content:'○'; color:rgba(255,152,0,0.5); margin-right:3px; }
     .lr-side-panel {
@@ -1522,7 +1525,7 @@
   <div id="mrms-view" class="view hidden">
     <button class="mvrp-back-btn" id="mrms-back-btn">&#8592; Model Explorer</button>
     <h2 class="proj-title">Vermont MRMS Viewer</h2>
-    <p class="proj-subtitle">Multi-Radar/Multi-Sensor System &mdash; Northeast CONUS</p>
+    <p class="proj-subtitle">Multi-Radar/Multi-Sensor System  Northeast CONUS</p>
 
     <!-- Product selector -->
     <div class="mrms-product-bar" id="mrms-product-bar">
@@ -1570,7 +1573,7 @@
   <!-- ── NWP Model Sandbox ── -->
   <div id="nwp-view" class="view hidden">
     <h2 class="proj-title">NWP Model Sandbox</h2>
-    <p class="proj-subtitle">Numerical Weather Prediction &mdash; High-Resolution Rapid Refresh</p>
+    <p class="proj-subtitle">Numerical Weather Prediction  High-Resolution Rapid Refresh</p>
 
     <!-- ── HRRR panel (native Leaflet) ── -->
     <div class="nwp-panel active" id="nwp-hrrr-panel">
@@ -1645,23 +1648,23 @@
     <div class="lr-summary-box" id="lr-summary-box" style="display:none">
       <div class="lr-sum-item">
         <div class="lr-sum-label">Last Ping</div>
-        <div class="lr-sum-value" id="lr-sum-ping">&mdash;</div>
+        <div class="lr-sum-value" id="lr-sum-ping"></div>
       </div>
       <div class="lr-sum-item">
         <div class="lr-sum-label">Current SFMR</div>
-        <div class="lr-sum-value lr-sum-sfmr" id="lr-sum-sfmr-cur">&mdash;</div>
+        <div class="lr-sum-value lr-sum-sfmr" id="lr-sum-sfmr-cur"></div>
       </div>
       <div class="lr-sum-item">
         <div class="lr-sum-label">Peak SFMR Winds</div>
-        <div class="lr-sum-value lr-sum-sfmr" id="lr-sum-sfmr">&mdash;</div>
+        <div class="lr-sum-value lr-sum-sfmr" id="lr-sum-sfmr"></div>
       </div>
       <div class="lr-sum-item">
         <div class="lr-sum-label">Peak FL Winds</div>
-        <div class="lr-sum-value lr-sum-fl" id="lr-sum-fl">&mdash;</div>
+        <div class="lr-sum-value lr-sum-fl" id="lr-sum-fl"></div>
       </div>
       <div class="lr-sum-item">
         <div class="lr-sum-label">Flight Altitude</div>
-        <div class="lr-sum-value" id="lr-sum-alt">&mdash;</div>
+        <div class="lr-sum-value" id="lr-sum-alt"></div>
       </div>
     </div>
     <div class="lr-main-layout" id="lr-main-layout" style="display:none">
@@ -1789,7 +1792,7 @@
   <div id="dsa-view" class="view hidden">
     <button class="mvrp-back-btn" id="dsa-back-btn">&#8592; Live Reconnaissance</button>
     <h2 class="proj-title">Dropsonde Analyzer</h2>
-    <p class="proj-subtitle">NHC Hurricane Reconnaissance Dropsonde Soundings &mdash; NOAA &amp; USAF</p>
+    <p class="proj-subtitle">NHC Hurricane Reconnaissance Dropsonde Soundings - NOAA &amp; USAF</p>
 
     <!-- Basin selector + refresh -->
     <div class="dsa-controls" id="dsa-controls">
@@ -1823,8 +1826,8 @@
       <!-- Skew-T / Log-P panel -->
       <div class="dsa-skewt-wrap">
         <div class="dsa-sonde-header">
-          <div class="dsa-sonde-title" id="dsa-sonde-title">—</div>
-          <div class="dsa-sonde-subtitle" id="dsa-sonde-subtitle">—</div>
+          <div class="dsa-sonde-title" id="dsa-sonde-title"></div>
+          <div class="dsa-sonde-subtitle" id="dsa-sonde-subtitle"></div>
         </div>
         <div style="position:relative">
           <canvas id="dsa-skewt-canvas" height="480"></canvas>
@@ -1881,6 +1884,186 @@
     </div>
   </div><!-- end #dsa-view -->
 
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- RADIOSONDE / ATMOSPHERIC SOUNDING VIEWER              -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="sounding-view" class="view hidden">
+    <button class="mvrp-back-btn" id="sounding-back-btn">&#8592; Model Explorer</button>
+
+    <h2 class="proj-title" style="margin-top:12px">TREP & VWP Sandbox</h2>
+    <p class="proj-subtitle">NOAA Upper-Air Atmospheric Sounding &bull; Skew-T Log-P Diagram &bull; Hodograph &bull; Stability Indices</p>
+    <p style="font-style:italic;font-size:10px;color:var(--text-muted);margin-top:4px;margin-bottom:16px">These tools are experimental and intended for research purposes only.</p>
+
+    <!-- Controls -->
+    <div class="snd-controls">
+      <div class="snd-ctrl-group">
+        <span class="snd-label">Station Select</span>
+        <select class="snd-select" id="snd-station-select" style="width:220px">
+          <option value=""> select station </option>
+        </select>
+      </div>
+      <div class="snd-ctrl-group">
+        <span class="snd-label">Year</span>
+        <input class="snd-input snd-input-sm" id="snd-year"  type="number" placeholder="YYYY" min="1973" max="2099" style="width:62px" />
+        <span class="snd-label">Mo</span>
+        <input class="snd-input snd-input-sm" id="snd-month" type="number" placeholder="MM"   min="1"    max="12"   style="width:46px" />
+        <span class="snd-label">Day</span>
+        <input class="snd-input snd-input-sm" id="snd-day"   type="number" placeholder="DD"   min="1"    max="31"   style="width:46px" />
+        <span class="snd-label">Hour</span>
+        <select class="snd-select" id="snd-hour" style="width:64px">
+          <option value="0">00Z</option>
+          <option value="12" selected>12Z</option>
+        </select>
+      </div>
+      <button class="snd-fetch-btn" id="snd-fetch-btn">Fetch Sounding</button>
+      <button class="snd-demo-btn"  id="snd-demo-btn">Demo</button>
+    </div>
+
+    <!-- TREP Forecast Panel -->
+    <div class="snd-trep-wrap">
+      <div class="snd-trep-header">
+        <span class="snd-card-title" style="margin-bottom:0">TREP - Tornado Risk Evaluation Parameter</span>
+        <span class="snd-trep-meta">GFS & HRRR Models &bull; CONUS</span>
+      </div>
+      <div class="snd-trep-controls">
+        <span class="snd-label">Location</span>
+        <input class="snd-input" id="snd-trep-loc" type="text" placeholder="City, ST  or  lat, lon" style="width:190px" />
+        <span class="snd-label">Forecast</span>
+        <select class="snd-select" id="snd-trep-hour" style="width:76px">
+          <option value="0">Now</option>
+          <option value="6">+6 hr</option>
+          <option value="12">+12 hr</option>
+          <option value="24">+24 hr</option>
+          <option value="48">+48 hr</option>
+        </select>
+        <span class="snd-label">Model</span>
+        <select class="snd-select" id="snd-trep-model" style="width:72px">
+          <option value="gfs_seamless">GFS</option>
+          <option value="gfs_hrrr">HRRR</option>
+        </select>
+        <button class="snd-fetch-btn" id="snd-trep-btn">Evaluate TREP</button>
+      </div>
+      <div id="snd-trep-status" class="snd-status"></div>
+      <div id="snd-trep-result" style="display:none">
+        <div class="snd-trep-result-inner">
+          <div class="snd-trep-score-block">
+            <div class="snd-trep-score" id="snd-trep-score"></div>
+            <div class="snd-trep-score-label">/ 10</div>
+          </div>
+          <div class="snd-trep-params" id="snd-trep-params"></div>
+        </div>
+        <div class="snd-trep-valid" id="snd-trep-valid"></div>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="snd-status" id="snd-status"></div>
+
+    <!-- Main layout: Skew-T | side panel -->
+    <div class="snd-main" id="snd-main-layout" style="display:none">
+
+      <!-- LEFT: Skew-T canvas -->
+      <div class="snd-skewt-wrap">
+        <canvas id="snd-skewt-canvas"></canvas>
+        <div class="snd-canvas-tip" id="snd-skewt-tip"></div>
+      </div>
+
+      <!-- RIGHT: info + indices + hodograph -->
+      <div class="snd-right">
+
+        <!-- Station info -->
+        <div class="snd-info-card">
+          <div class="snd-card-title">Station Info</div>
+          <div class="snd-info-grid">
+            <div class="snd-info-row">
+              <span class="snd-info-lbl">Station</span>
+              <span class="snd-info-val" id="snd-station-name"></span>
+            </div>
+            <div class="snd-info-row">
+              <span class="snd-info-lbl">WMO</span>
+              <span class="snd-info-val" id="snd-station-wmo"></span>
+            </div>
+            <div class="snd-info-row" style="grid-column:1/-1">
+              <span class="snd-info-lbl">Valid Time</span>
+              <span class="snd-info-val" id="snd-station-date"></span>
+            </div>
+            <div class="snd-info-row">
+              <span class="snd-info-lbl">Levels</span>
+              <span class="snd-info-val" id="snd-station-levels"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stability indices -->
+        <div class="snd-indices-card">
+          <div class="snd-card-title">Stability Indices</div>
+          <div class="snd-idx-row"><span class="snd-idx-name">CAPE</span>       <span class="snd-idx-val" id="snd-i-cape"></span></div>
+          <div class="snd-idx-row"><span class="snd-idx-name">CIN</span>        <span class="snd-idx-val" id="snd-i-cin"></span></div>
+          <div class="snd-idx-row"><span class="snd-idx-name">Lifted Index</span><span class="snd-idx-val" id="snd-i-li"></span></div>
+          <div class="snd-idx-row"><span class="snd-idx-name">K-Index</span>   <span class="snd-idx-val" id="snd-i-ki"></span></div>
+          <div class="snd-idx-row"><span class="snd-idx-name">Precip Water</span><span class="snd-idx-val" id="snd-i-pw"></span></div>
+          <div class="snd-card-title" style="margin-top:10px">Surface / Key Levels</div>
+          <div class="snd-idx-row"><span class="snd-idx-name">Sfc Temp</span>  <span class="snd-idx-val" id="snd-i-sfct"></span></div>
+          <div class="snd-idx-row"><span class="snd-idx-name">Sfc Dewpt</span> <span class="snd-idx-val" id="snd-i-sfctd"></span></div>
+          <div class="snd-idx-row"><span class="snd-idx-name">Sfc RH</span>    <span class="snd-idx-val" id="snd-i-sfcrh"></span></div>
+          <div class="snd-idx-row"><span class="snd-idx-name">500 hPa Temp</span><span class="snd-idx-val" id="snd-i-t500"></span></div>
+        </div>
+
+        <!-- Hazard Assessment -->
+        <div class="snd-hazard-card" id="snd-hazard-card" style="display:none">
+          <div class="snd-card-title">Possible Hazard</div>
+          <div class="snd-hazard-badge">
+            <span id="snd-hazard-type"></span>
+          </div>
+        </div>
+
+        <!-- Hodograph -->
+        <div class="snd-hodo-card" id="snd-hodo-card">
+          <div class="snd-hodo-header">
+            <div class="snd-card-title" id="snd-hodo-title">Hodograph</div>
+            <div style="display:flex;gap:4px;align-items:center">
+              <button class="snd-hodo-toggle" id="snd-hodo-toggle-btn" title="Toggle 3D view">2D / 3D</button>
+              <button class="snd-hodo-toggle snd-hodo-fs-btn" id="snd-hodo3d-fs-btn" title="Full screen 3D" style="display:none">&#x26F6;</button>
+            </div>
+          </div>
+          <canvas id="snd-hodo-canvas"></canvas>
+          <canvas id="snd-hodo-3d-canvas" style="display:none"></canvas>
+        </div>
+
+      </div><!-- end .snd-right -->
+    </div><!-- end #snd-main-layout -->
+
+    <!-- Empty state -->
+    <div class="snd-empty" id="snd-empty-state">
+      <p>Enter a WMO station number and a date above, then click <strong>Fetch Sounding</strong>.<br>
+      Use the quick-select list for common US upper-air sites, or click <strong>Demo</strong> to preview a classic supercell sounding.</p>
+    </div>
+
+    <!-- Data table -->
+    <div class="snd-table-wrap" id="snd-table-wrap" style="display:none">
+      <div class="snd-table-scroll">
+        <table class="snd-table">
+          <thead>
+            <tr>
+              <th>Pres (hPa)</th>
+              <th>Hght (ft)</th>
+              <th>Temp (°F)</th>
+              <th>Dwpt (°F)</th>
+              <th>RH (%)</th>
+              <th>Wind</th>
+            </tr>
+          </thead>
+          <tbody id="snd-data-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="snd-source">
+      Upper-air data: <a href="https://weather.uwyo.edu/upperair/sounding.html" target="_blank" rel="noopener noreferrer" style="color:rgba(139,32,192,0.8)">University of Wyoming RAOBs</a>
+      &nbsp;&bull;&nbsp; Coded &amp; Visualized by Sabr3&nbsp;|&nbsp;VTSU Atmospheric Sciences
+    </div>
+  </div><!-- end #sounding-view -->
+
   </div><!-- end #scroll-root -->
 
   <script>
@@ -1921,7 +2104,7 @@
         };
       }
 
-      // Precomputed sine lookup table — avoids 547 Math.sin() calls per frame
+      // Precomputed sine lookup table  avoids 547 Math.sin() calls per frame
       const SIN_TABLE_SIZE = 2048;
       const SIN_TABLE = new Float32Array(SIN_TABLE_SIZE);
       for (let i = 0; i < SIN_TABLE_SIZE; i++) SIN_TABLE[i] = Math.sin((i / SIN_TABLE_SIZE) * Math.PI * 2);
@@ -2001,7 +2184,8 @@
       const dsaView            = document.getElementById('dsa-view');
       const tdrView            = document.getElementById('tdr-view');
       const liveReconView      = document.getElementById('live-recon-view');
-      const allViews = [profileView, projectsView, portfolioView, modelExplorerView, avcView, mvrpView, mrmsView, nwpView, dsaView, tdrView, liveReconView];
+      const soundingView       = document.getElementById('sounding-view');
+      const allViews = [profileView, projectsView, portfolioView, modelExplorerView, avcView, mvrpView, mrmsView, nwpView, dsaView, tdrView, liveReconView, soundingView];
       const tagline = document.getElementById('bottom-tagline');
       const scrollRoot = document.getElementById('scroll-root');
 
@@ -2020,6 +2204,7 @@
         if (show === dsaView)        dsaInit();
         if (show === tdrView)        tdrInit();
         if (show === liveReconView && window.liveReconInit) liveReconInit();
+        if (show === soundingView && window.soundingInit) soundingInit();
       }
 
       document.getElementById('projects-btn').addEventListener('click', function (e) {
@@ -2037,12 +2222,14 @@
         showView(modelExplorerView);
       });
 
-      window._showAVC       = function () { showView(avcView); };
-      window._showMVRP      = function () { showView(mvrpView); };
-      window._showMRMS      = function () { showView(mrmsView); };
-      window._showDropsonde  = function () { showView(dsaView); };
-      window._showTDR        = function () { showView(tdrView); };
-      window._showLiveRecon  = function () { showView(liveReconView); };
+      window._showAVC            = function () { showView(avcView); };
+      window._showMVRP           = function () { showView(mvrpView); };
+      window._showMRMS           = function () { showView(mrmsView); };
+      window._showDropsonde       = function () { showView(dsaView); };
+      window._showTDR             = function () { showView(tdrView); };
+      window._showLiveRecon       = function () { showView(liveReconView); };
+      window._showSounding        = function () { showView(soundingView); };
+      window._showModelExplorer   = function () { showView(modelExplorerView); };
 
       document.getElementById('live-recon-back-btn').addEventListener('click', function () {
         showView(modelExplorerView);
@@ -2077,6 +2264,7 @@
         { cat: 'Custom',    desig: 'MV-REP', nick: 'Mesovortex Risk Evaluation Parameter', dev: 'Sabr3 / VTSU', res: '~3 km',  horizon: '6-12 hr',   cycle: 'Experimental', notes: 'Next-generation parameter targeting mesovortex formation within landfalling major hurricanes; Meso-Vortice Project', action: 'mvrp' },
         { cat: 'Custom',    desig: 'MRMS',   nick: 'Vermont MRMS Viewer',                  dev: 'Sabr3 / VTSU', res: '~1 km',  horizon: 'Real-time', cycle: '~2 min',       notes: 'Live Multi-Radar/Multi-Sensor System composite reflectivity, echo tops and QPE for the Northeast CONUS.', action: 'mrms' },
         { cat: 'Custom',    desig: 'RECON', nick: 'Live Reconnaissance',                   dev: 'Sabr3 / VTSU', res: '~150 m',  horizon: 'Real-time',    cycle: 'Real-time',  notes: 'Live NOAA & USAF Hurricane Hunter data — Tail Doppler Radar imagery and dropsonde soundings from active missions.', action: 'live-recon' },
+        { cat: 'Custom',    desig: 'TREP & VWP',  nick: 'Radiosonde Sounding Viewer',              dev: 'Sabr3 / VTSU', res: 'Point',  horizon: 'Archive',       cycle: 'On demand',  notes: 'Interactive upper-air sounding viewer with an experimental TREP system & 3D VWP playground.', action: 'sounding' },
       ];
 
       const grid = document.getElementById('me-grid');
@@ -2111,6 +2299,7 @@
               if (m.action === 'dropsonde')  { window._showDropsonde && window._showDropsonde(); }
               if (m.action === 'tdr')        { window._showTDR && window._showTDR(); }
               if (m.action === 'live-recon') { window._showLiveRecon && window._showLiveRecon(); }
+              if (m.action === 'sounding')   { window._showSounding  && window._showSounding();  }
             });
           }
           grid.appendChild(card);
@@ -2161,6 +2350,7 @@
   <script src="tools/mvrp.js"></script>
   <script src="tools/avc.js"></script>
   <script src="tools/dsa.js"></script>
+  <script src="tools/sounding.js"></script>
   <script src="tools/tdr.js"></script>
   <script src="tools/liveRecon.js"></script>
   <script src="tools/mrms.js"></script>
@@ -2243,7 +2433,7 @@
       }
       drawCursorStar();
 
-      const HALF_STAR = S / 2;     // 14 — center the 28px canvas on cursor
+      const HALF_STAR = S / 2;     // 14  center the 28px canvas on cursor
       const HALF_RING = 18;         // 36 / 2
       const HALF_GLOW = 65;         // 130 / 2
 
@@ -2251,7 +2441,7 @@
       let ringX = -200, ringY = -200;
       let glowX = -200, glowY = -200;
 
-      // Passive listener — only stores coords, no DOM work here
+      // Passive listener  only stores coords, no DOM work here
       document.addEventListener('mousemove', e => {
         mx = e.clientX;
         my = e.clientY;
