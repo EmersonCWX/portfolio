@@ -1890,8 +1890,8 @@
   <div id="sounding-view" class="view hidden">
     <button class="mvrp-back-btn" id="sounding-back-btn">&#8592; Model Explorer</button>
 
-    <h2 class="proj-title" style="margin-top:12px">TREP & VWP Sandbox</h2>
-    <p class="proj-subtitle">NOAA Upper-Air Atmospheric Sounding &bull; Skew-T Log-P Diagram &bull; Hodograph &bull; Stability Indices</p>
+    <h2 class="proj-title" style="margin-top:12px">Sounding &amp; VWP Sandbox</h2>
+    <p class="proj-subtitle">NOAA Upper-Air Atmospheric Sounding &bull; Skew-T Log-P Diagram &bull; Hodograph &bull; WSR-88D VAD Wind Profiles</p>
     <p style="font-style:italic;font-size:10px;color:var(--text-muted);margin-top:4px;margin-bottom:16px">These tools are experimental and intended for research purposes only.</p>
 
     <!-- Controls -->
@@ -1919,8 +1919,8 @@
       <button class="snd-demo-btn"  id="snd-demo-btn">Demo</button>
     </div>
 
-    <!-- TREP Forecast Panel -->
-    <div class="snd-trep-wrap">
+    <!-- ARCHIVED: TREP Forecast Panel — testing concluded
+    <div class="snd-trep-wrap" style="display:none">
       <div class="snd-trep-header">
         <span class="snd-card-title" style="margin-bottom:0">TREP - Tornado Risk Evaluation Parameter</span>
         <span class="snd-trep-meta">GFS & HRRR Models &bull; CONUS</span>
@@ -1955,6 +1955,38 @@
         <div class="snd-trep-valid" id="snd-trep-valid"></div>
       </div>
     </div>
+    END ARCHIVED: TREP -->
+
+    <!-- ARCHIVED: WSR-88D VAD Wind Profile Panel — testing concluded
+    <div class="snd-vwp-wrap" id="snd-vwp-wrap">
+      <div class="snd-vwp-header">
+        <span class="snd-card-title" style="margin-bottom:0">WSR-88D VAD Vertical Wind Profile</span>
+        <span class="snd-vwp-meta">CONUS NEXRAD Level-III &bull; NVW Product &bull; Unidata THREDDS</span>
+      </div>
+      <div class="snd-controls" style="flex-wrap:wrap;gap:10px">
+        <div class="snd-ctrl-group">
+          <span class="snd-label">Radar Site</span>
+          <select class="snd-select" id="snd-vwp-station" style="width:270px"></select>
+        </div>
+        <div class="snd-ctrl-group">
+          <span class="snd-label">Date</span>
+          <input type="date" id="snd-vwp-date" class="snd-input" style="width:136px" />
+        </div>
+        <button class="snd-fetch-btn" id="snd-vwp-list-btn">List Scans</button>
+      </div>
+      <div class="snd-controls snd-vwp-scan-row" id="snd-vwp-scan-row" style="display:none;flex-wrap:wrap;gap:10px;padding-top:8px;border-top:1px solid rgba(139,32,192,0.12)">
+        <div class="snd-ctrl-group">
+          <span class="snd-label">Scan (UTC)</span>
+          <select class="snd-select" id="snd-vwp-scan-sel" style="width:180px"></select>
+        </div>
+        <button class="snd-fetch-btn" id="snd-vwp-load-btn">Load VWP &rarr;</button>
+      </div>
+      <div class="snd-status" id="snd-vwp-status"></div>
+      <div class="snd-vwp-canvas-wrap" id="snd-vwp-canvas-wrap" style="display:none">
+        <canvas id="snd-vwp-canvas"></canvas>
+      </div>
+    </div>
+    END ARCHIVED: VWP -->
 
     <!-- Status bar -->
     <div class="snd-status" id="snd-status"></div>
