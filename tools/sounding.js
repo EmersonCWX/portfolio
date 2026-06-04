@@ -1726,6 +1726,631 @@
     if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') _runTREP(); });
   }
 
+  // ══ WSR-88D VAD Wind Profile (VWP) ══════════════════════════════
+  const VWP_STATIONS = [
+    // Northeast
+    { id: 'BOX', name: 'Boston, MA (KBOX)' },
+    { id: 'GYX', name: 'Portland, ME (KGYX)' },
+    { id: 'CBW', name: 'Caribou, ME (KCBW)' },
+    { id: 'BGM', name: 'Binghamton, NY (KBGM)' },
+    { id: 'BUF', name: 'Buffalo, NY (KBUF)' },
+    { id: 'ENX', name: 'Albany, NY (KENX)' },
+    { id: 'OKX', name: 'New York City, NY (KOKX)' },
+    { id: 'TYX', name: 'Fort Drum, NY (KTYX)' },
+    { id: 'DIX', name: 'Mt. Holly, NJ (KDIX)' },
+    { id: 'DOX', name: 'Dover, DE (KDOX)' },
+    { id: 'CCX', name: 'State College, PA (KCCX)' },
+    { id: 'PBZ', name: 'Pittsburgh, PA (KPBZ)' },
+    { id: 'CXX', name: 'Burlington, VT (KCXX)' },
+    // Mid-Atlantic / Appalachian
+    { id: 'AKQ', name: 'Wakefield, VA (KAKQ)' },
+    { id: 'LWX', name: 'Sterling, VA (KLWX)' },
+    { id: 'FCX', name: 'Roanoke, VA (KFCX)' },
+    { id: 'RLX', name: 'Charleston, WV (KRLX)' },
+    { id: 'MHX', name: 'Morehead City, NC (KMHX)' },
+    { id: 'RAX', name: 'Raleigh-Durham, NC (KRAX)' },
+    { id: 'GSP', name: 'Greenville-Spartanburg, SC (KGSP)' },
+    { id: 'CAE', name: 'Columbia, SC (KCAE)' },
+    { id: 'CLX', name: 'Charleston, SC (KCLX)' },
+    { id: 'LTX', name: 'Wilmington, NC (KLTX)' },
+    // Southeast / Florida
+    { id: 'FFC', name: 'Atlanta, GA (KFFC)' },
+    { id: 'JGX', name: 'Robins AFB, GA (KJGX)' },
+    { id: 'VAX', name: 'Valdosta, GA (KVAX)' },
+    { id: 'JAX', name: 'Jacksonville, FL (KJAX)' },
+    { id: 'MLB', name: 'Melbourne, FL (KMLB)' },
+    { id: 'TBW', name: 'Tampa Bay, FL (KTBW)' },
+    { id: 'TLH', name: 'Tallahassee, FL (KTLH)' },
+    { id: 'EVX', name: 'Eglin AFB, FL (KEVX)' },
+    { id: 'BYX', name: 'Key West, FL (KBYX)' },
+    // Deep South
+    { id: 'MOB', name: 'Mobile, AL (KMOB)' },
+    { id: 'BMX', name: 'Birmingham, AL (KBMX)' },
+    { id: 'HTX', name: 'Huntsville, AL (KHTX)' },
+    { id: 'MXX', name: 'Maxwell AFB, AL (KMXX)' },
+    { id: 'EOX', name: 'Fort Rucker, AL (KEOX)' },
+    { id: 'GWX', name: 'Columbus, MS (KGWX)' },
+    { id: 'DGX', name: 'Jackson, MS (KDGX)' },
+    { id: 'LCH', name: 'Lake Charles, LA (KLCH)' },
+    { id: 'SHV', name: 'Shreveport, LA (KSHV)' },
+    { id: 'POE', name: 'Fort Polk, LA (KPOE)' },
+    // Texas / Southern Plains
+    { id: 'HGX', name: 'Houston, TX (KHGX)' },
+    { id: 'CRP', name: 'Corpus Christi, TX (KCRP)' },
+    { id: 'BRO', name: 'Brownsville, TX (KBRO)' },
+    { id: 'EWX', name: 'San Antonio, TX (KEWX)' },
+    { id: 'GRK', name: 'Fort Hood, TX (KGRK)' },
+    { id: 'FWS', name: 'Dallas-Fort Worth, TX (KFWS)' },
+    { id: 'DYX', name: 'Abilene, TX (KDYX)' },
+    { id: 'SJT', name: 'San Angelo, TX (KSJT)' },
+    { id: 'LBB', name: 'Lubbock, TX (KLBB)' },
+    { id: 'AMA', name: 'Amarillo, TX (KAMA)' },
+    { id: 'MAF', name: 'Midland-Odessa, TX (KMAF)' },
+    { id: 'EPZ', name: 'El Paso, TX (KEPZ)' },
+    { id: 'DFX', name: 'Laughlin AFB, TX (KDFX)' },
+    // Central Plains
+    { id: 'TLX', name: 'Oklahoma City, OK (KTLX)' },
+    { id: 'INX', name: 'Tulsa, OK (KINX)' },
+    { id: 'VNX', name: 'Enid, OK (KVNX)' },
+    { id: 'FDR', name: 'Frederick, OK (KFDR)' },
+    { id: 'SRX', name: 'Fort Smith, AR (KSRX)' },
+    { id: 'LZK', name: 'Little Rock, AR (KLZK)' },
+    { id: 'DDC', name: 'Dodge City, KS (KDDC)' },
+    { id: 'ICT', name: 'Wichita, KS (KICT)' },
+    { id: 'TWX', name: 'Topeka, KS (KTWX)' },
+    { id: 'EAX', name: 'Kansas City, MO (KEAX)' },
+    { id: 'SGF', name: 'Springfield, MO (KSGF)' },
+    { id: 'LSX', name: 'St. Louis, MO (KLSX)' },
+    // Great Lakes / Midwest
+    { id: 'IWX', name: 'Fort Wayne, IN (KIWX)' },
+    { id: 'IND', name: 'Indianapolis, IN (KIND)' },
+    { id: 'VWX', name: 'Evansville, IN (KVWX)' },
+    { id: 'JKL', name: 'Jackson, KY (KJKL)' },
+    { id: 'HPX', name: 'Fort Campbell, KY (KHPX)' },
+    { id: 'LVX', name: 'Louisville, KY (KLVX)' },
+    { id: 'PAH', name: 'Paducah, KY (KPAH)' },
+    { id: 'MRX', name: 'Knoxville, TN (KMRX)' },
+    { id: 'OHX', name: 'Nashville, TN (KOHX)' },
+    { id: 'NQA', name: 'Memphis, TN (KNQA)' },
+    { id: 'ILN', name: 'Cincinnati, OH (KILN)' },
+    { id: 'CLE', name: 'Cleveland, OH (KCLE)' },
+    { id: 'DTX', name: 'Detroit, MI (KDTX)' },
+    { id: 'GRR', name: 'Grand Rapids, MI (KGRR)' },
+    { id: 'APX', name: 'Gaylord, MI (KAPX)' },
+    { id: 'MQT', name: 'Marquette, MI (KMQT)' },
+    { id: 'LOT', name: 'Chicago, IL (KLOT)' },
+    { id: 'ILX', name: 'Lincoln, IL (KILX)' },
+    { id: 'DVN', name: 'Davenport, IA (KDVN)' },
+    { id: 'DMX', name: 'Des Moines, IA (KDMX)' },
+    { id: 'ARX', name: 'La Crosse, WI (KARX)' },
+    { id: 'MKX', name: 'Milwaukee, WI (KMKX)' },
+    { id: 'GRB', name: 'Green Bay, WI (KGRB)' },
+    { id: 'DLH', name: 'Duluth, MN (KDLH)' },
+    { id: 'MPX', name: 'Minneapolis, MN (KMPX)' },
+    // Northern Plains
+    { id: 'OAX', name: 'Omaha, NE (KOAX)' },
+    { id: 'UEX', name: 'Hastings, NE (KUEX)' },
+    { id: 'LNX', name: 'North Platte, NE (KLNX)' },
+    { id: 'FSD', name: 'Sioux Falls, SD (KFSD)' },
+    { id: 'ABR', name: 'Aberdeen, SD (KABR)' },
+    { id: 'UDX', name: 'Rapid City, SD (KUDX)' },
+    { id: 'MVX', name: 'Grand Forks, ND (KMVX)' },
+    { id: 'BIS', name: 'Bismarck, ND (KBIS)' },
+    { id: 'MBX', name: 'Minot, ND (KMBX)' },
+    { id: 'GGW', name: 'Glasgow, MT (KGGW)' },
+    { id: 'TFX', name: 'Great Falls, MT (KTFX)' },
+    { id: 'MSX', name: 'Missoula, MT (KMSX)' },
+    { id: 'BLX', name: 'Billings, MT (KBLX)' },
+    // Mountain West
+    { id: 'RIW', name: 'Riverton, WY (KRIW)' },
+    { id: 'CYS', name: 'Cheyenne, WY (KCYS)' },
+    { id: 'FTG', name: 'Denver, CO (KFTG)' },
+    { id: 'PUX', name: 'Pueblo, CO (KPUX)' },
+    { id: 'GJX', name: 'Grand Junction, CO (KGJX)' },
+    { id: 'GLD', name: 'Goodland, KS (KGLD)' },
+    { id: 'ICX', name: 'Cedar City, UT (KICX)' },
+    { id: 'MTX', name: 'Salt Lake City, UT (KMTX)' },
+    { id: 'SFX', name: 'Pocatello, ID (KSFX)' },
+    { id: 'CBX', name: 'Boise, ID (KCBX)' },
+    { id: 'ABX', name: 'Albuquerque, NM (KABX)' },
+    { id: 'HDX', name: 'Holloman AFB, NM (KHDX)' },
+    { id: 'FDX', name: 'Cannon AFB, NM (KFDX)' },
+    { id: 'FSX', name: 'Flagstaff, AZ (KFSX)' },
+    { id: 'EMX', name: 'Tucson, AZ (KEMX)' },
+    { id: 'IWA', name: 'Phoenix, AZ (KIWA)' },
+    { id: 'YUX', name: 'Yuma, AZ (KYUX)' },
+    // West Coast
+    { id: 'LGX', name: 'Langley Hill, WA (KLGX)' },
+    { id: 'ATX', name: 'Seattle-Tacoma, WA (KATX)' },
+    { id: 'OTX', name: 'Spokane, WA (KOTX)' },
+    { id: 'PDT', name: 'Pendleton, OR (KPDT)' },
+    { id: 'RTX', name: 'Portland, OR (KRTX)' },
+    { id: 'MAX', name: 'Medford, OR (KMAX)' },
+    { id: 'RGX', name: 'Reno, NV (KRGX)' },
+    { id: 'ESX', name: 'Las Vegas, NV (KESX)' },
+    { id: 'LRX', name: 'Elko, NV (KLRX)' },
+    { id: 'BBX', name: 'Beale AFB, CA (KBBX)' },
+    { id: 'DAX', name: 'Sacramento, CA (KDAX)' },
+    { id: 'MUX', name: 'San Francisco, CA (KMUX)' },
+    { id: 'HNX', name: 'San Joaquin Valley, CA (KHNX)' },
+    { id: 'VTX', name: 'Los Angeles, CA (KVTX)' },
+    { id: 'SOX', name: 'Santa Ana Mtns, CA (KSOX)' },
+    { id: 'NKX', name: 'San Diego, CA (KNKX)' },
+    { id: 'VBX', name: 'Vandenberg AFB, CA (KVBX)' },
+    { id: 'EYX', name: 'Edwards AFB, CA (KEYX)' },
+    { id: 'BHX', name: 'Eureka, CA (KBHX)' },
+  ];
+
+  // Fetch helper that falls back to CORS proxy for THREDDS
+  async function _vwpFetch(url, mode) {
+    mode = mode || 'text';
+    const proxies = [
+      url,
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+      'https://corsproxy.io/?url=' + encodeURIComponent(url),
+    ];
+    for (const p of proxies) {
+      try {
+        const resp = await fetch(p, { signal: AbortSignal.timeout(14000) });
+        if (!resp.ok) continue;
+        return mode === 'buffer' ? await resp.arrayBuffer() : await resp.text();
+      } catch (e) { /* try next */ }
+    }
+    throw new Error('All fetch attempts failed for: ' + url);
+  }
+
+  // Populate the VWP station dropdown
+  function _vwpPopulateStations() {
+    const sel = document.getElementById('snd-vwp-station');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">&#9013; select radar site</option>';
+    VWP_STATIONS.forEach(function (s) {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = s.name;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Set the VWP status message
+  function _vwpStatus(msg, cls) {
+    const el = document.getElementById('snd-vwp-status');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'snd-status' + (cls ? ' ' + cls : '');
+  }
+
+  // Fetch available scans for a station + date from UCAR THREDDS
+  async function _vwpListScans() {
+    const staSel = document.getElementById('snd-vwp-station');
+    const datEl  = document.getElementById('snd-vwp-date');
+    const scanRow = document.getElementById('snd-vwp-scan-row');
+    const scanSel = document.getElementById('snd-vwp-scan-sel');
+    if (!staSel || !datEl) return;
+
+    const sid  = staSel.value.trim().toUpperCase();
+    const date = datEl.value.replace(/-/g, '');  // YYYYMMDD
+
+    if (!sid) { _vwpStatus('Select a radar site first.', 'error'); return; }
+    if (!date || date.length !== 8) { _vwpStatus('Enter a valid date.', 'error'); return; }
+
+    _vwpStatus('Querying THREDDS for ' + sid + ' · ' + date + '…', 'loading');
+    if (scanRow) scanRow.style.display = 'none';
+
+    const catalogUrl = 'https://thredds.ucar.edu/thredds/catalog/nexrad/level3/NVW/'
+      + sid + '/' + date + '/catalog.html';
+
+    let html;
+    try {
+      html = await _vwpFetch(catalogUrl, 'text');
+    } catch (e) {
+      _vwpStatus('Could not reach THREDDS catalog. Check station / date and try again.', 'error');
+      return;
+    }
+
+    // Parse filenames: Level3_DMX_NVW_20260415_1620.nids
+    const re = /Level3_[A-Z]{3}_NVW_\d{8}_\d{4}\.nids/g;
+    const files = [...new Set(html.match(re) || [])];
+
+    if (files.length === 0) {
+      _vwpStatus('No NVW scans found for ' + sid + ' on ' + date + '. Try a different date.', 'error');
+      return;
+    }
+
+    // Sort descending (most recent first)
+    files.sort(function (a, b) { return b > a ? 1 : -1; });
+
+    scanSel.innerHTML = '';
+    files.forEach(function (f) {
+      // Extract HHMM from filename
+      const m = f.match(/_(\d{4})\.nids$/);
+      const hhmm = m ? m[1].slice(0, 2) + ':' + m[1].slice(2) + ' UTC' : f;
+      const opt = document.createElement('option');
+      opt.value = f;
+      opt.textContent = hhmm + ' — ' + f;
+      scanSel.appendChild(opt);
+    });
+
+    if (scanRow) scanRow.style.display = '';
+    _vwpStatus(files.length + ' scans available · select a time and click Load VWP', 'good');
+  }
+
+  // Download & parse a specific NVW NIDS file, then render
+  async function _vwpLoadProfile() {
+    const staSel = document.getElementById('snd-vwp-station');
+    const datEl  = document.getElementById('snd-vwp-date');
+    const scanSel = document.getElementById('snd-vwp-scan-sel');
+    const canWrap = document.getElementById('snd-vwp-canvas-wrap');
+    if (!staSel || !datEl || !scanSel) return;
+
+    const sid      = staSel.value.trim().toUpperCase();
+    const date     = datEl.value.replace(/-/g, '');
+    const filename = scanSel.value;
+
+    if (!sid || !date || !filename) { _vwpStatus('Select a station, date and scan first.', 'error'); return; }
+
+    _vwpStatus('Downloading ' + filename + '…', 'loading');
+    if (canWrap) canWrap.style.display = 'none';
+
+    const fileUrl = 'https://thredds.ucar.edu/thredds/fileServer/nexrad/level3/NVW/'
+      + sid + '/' + date + '/' + filename;
+
+    let buf;
+    try {
+      buf = await _vwpFetch(fileUrl, 'buffer');
+    } catch (e) {
+      _vwpStatus('Download failed: ' + e.message, 'error');
+      return;
+    }
+
+    let data;
+    try {
+      data = _vwpParseNids(buf, sid);
+    } catch (e) {
+      _vwpStatus('Parse error: ' + e.message, 'error');
+      return;
+    }
+
+    if (!data || data.levels.length === 0) {
+      _vwpStatus('No wind data found in this scan.', 'error');
+      return;
+    }
+
+    _vwpRenderCanvas(data);
+    _vwpStatus(
+      'K' + sid + '  ·  ' + data.levels.length + ' levels  ·  '
+      + (data.scanTime || filename.match(/_(\d{4})\.nids/)?.[1]?.replace(/(\d{2})(\d{2})/, '$1:$2') || '') + ' UTC',
+      'good'
+    );
+  }
+
+  // Parse NEXRAD Level-3 NVW (Product 48) binary NIDS file
+  // Strategy: decode binary as Latin-1, search for ASCII wind-profile text sections
+  function _vwpParseNids(buffer, stationId) {
+    const bytes = new Uint8Array(buffer);
+    // Decode entire file as Latin-1 (preserves all byte values)
+    let raw = '';
+    for (let i = 0; i < bytes.length; i++) raw += String.fromCharCode(bytes[i]);
+
+    // Extract station metadata from text header pattern in file
+    const staMeta = raw.match(/VAD +Station:\s*(\w+)\s+Lat:\s*([-\d.]+)\s+Lon:\s*([-\d.]+)\s+Alt:\s*(\d+)\s*ft\s+MSL/);
+    const aglMeta = raw.match(/Hgh\s*=\s*(\d+)\s*ft\s+AGL/);
+
+    // Extract scan time from binary MHB: bytes 4-7 = ms past midnight (uint32 big-endian)
+    // bytes 2-3 = days since Jan 1, 1970 (uint16 big-endian) → but we have the time from filename too
+    let scanTime = null;
+    if (bytes.length >= 8) {
+      const view = new DataView(buffer);
+      const days = view.getUint16(2, false);   // big-endian
+      const msec = view.getUint32(4, false);   // big-endian
+      if (days > 0 && msec < 86400000) {
+        const epoch = (days - 1) * 86400000 + msec;
+        const d = new Date(epoch);
+        const pad2 = n => String(n).padStart(2, '0');
+        scanTime = pad2(d.getUTCHours()) + ':' + pad2(d.getUTCMinutes()) + 'Z';
+      }
+    }
+
+    // Wind profile data line pattern:
+    // "  0.5   25  270   1.2   GS" or "  2.0   MM   MM   MM"
+    const lineRe = /(?:^|\n)\s{1,4}(\d+\.\d)\s+(MM|\d+)\s+(MM|\d+)\s+(MM|\d+\.?\d*)\s*([A-Z]*)/gm;
+    const levels = [];
+    let m;
+    while ((m = lineRe.exec(raw)) !== null) {
+      const hgt  = parseFloat(m[1]);
+      const spd  = m[2] === 'MM' ? null : parseInt(m[2], 10);
+      const dir  = m[3] === 'MM' ? null : parseInt(m[3], 10);
+      const rms  = m[4] === 'MM' ? null : parseFloat(m[4]);
+      const edit = (m[5] || '').trim();
+
+      // Sanity: height must be a valid VWP altitude
+      if (hgt < 0.4 || hgt > 71) continue;
+      // Speed can be null (missing) but if present must be reasonable
+      if (spd !== null && (spd < 0 || spd > 300)) continue;
+      // Direction must be 0-360
+      if (dir !== null && (dir < 0 || dir > 360)) continue;
+
+      levels.push({ hgt, spd, dir, rms, edit });
+    }
+
+    // Deduplicate by altitude (keep last occurrence)
+    const seen = new Map();
+    for (const lvl of levels) seen.set(lvl.hgt, lvl);
+    const uniqueLevels = [...seen.values()].sort((a, b) => a.hgt - b.hgt);
+
+    return {
+      station:  staMeta ? staMeta[1] : ('K' + stationId),
+      lat:      staMeta ? parseFloat(staMeta[2]) : null,
+      lon:      staMeta ? parseFloat(staMeta[3]) : null,
+      altMSL:   staMeta ? parseInt(staMeta[4], 10) : null,
+      altAGL:   aglMeta ? parseInt(aglMeta[1], 10) : null,
+      scanTime: scanTime,
+      levels:   uniqueLevels,
+    };
+  }
+
+  // Render the VWP wind-barb chart onto the canvas
+  function _vwpRenderCanvas(data) {
+    const canvas  = document.getElementById('snd-vwp-canvas');
+    const canWrap = document.getElementById('snd-vwp-canvas-wrap');
+    if (!canvas) return;
+
+    const levels = data.levels;
+    const maxHgt = Math.max(70, levels.length > 0 ? Math.ceil(levels[levels.length - 1].hgt) : 70);
+    const DPR    = Math.min(window.devicePixelRatio || 1, 2);
+
+    // Layout constants (logical px)
+    const W  = 700, H = 780;
+    const ML = 68,  MR = 20, MT = 44, MB = 36;   // margins
+    const plotH = H - MT - MB;
+    const AXIS_X = ML;
+    const BARB_X = ML + 80;   // x-center of the barb column
+
+    canvas.width  = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(DPR, DPR);
+
+    // Background
+    ctx.fillStyle = 'rgba(8, 4, 18, 0.97)';
+    ctx.fillRect(0, 0, W, H);
+
+    // Helper: altitude → y pixel
+    function hy(hgt) {
+      return H - MB - (hgt / maxHgt) * plotH;
+    }
+
+    // Speed → color
+    function spColor(spd) {
+      if (spd === null) return '#444';
+      if (spd <  15)   return '#4caf50';   // calm/light: green
+      if (spd <  30)   return '#ccd000';   // moderate: yellow
+      if (spd <  50)   return '#ff8800';   // strong: orange
+      if (spd <  80)   return '#e53935';   // very strong: red
+      return '#cc00ee';                    // jet: purple
+    }
+
+    // ── Grid lines & altitude labels ──────────────────────────
+    for (let h = 0; h <= maxHgt; h += 5) {
+      const y = hy(h);
+      const isMajor = h % 10 === 0;
+      ctx.strokeStyle = isMajor ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)';
+      ctx.lineWidth   = isMajor ? 0.8 : 0.4;
+      ctx.beginPath();
+      ctx.moveTo(ML, y);
+      ctx.lineTo(W - MR, y);
+      ctx.stroke();
+      if (isMajor) {
+        ctx.fillStyle  = 'rgba(200,180,255,0.5)';
+        ctx.font       = '10px Consolas, monospace';
+        ctx.textAlign  = 'right';
+        ctx.fillText(h + ' kft', ML - 4, y + 3.5);
+      }
+    }
+
+    // ── Axis line ──────────────────────────────────────────────
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.moveTo(AXIS_X, MT);
+    ctx.lineTo(AXIS_X, H - MB);
+    ctx.stroke();
+
+    // ── Axis label (rotated) ───────────────────────────────────
+    ctx.save();
+    ctx.translate(14, (MT + H - MB) / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle  = 'rgba(255,255,255,0.3)';
+    ctx.font       = '10px Inter, sans-serif';
+    ctx.textAlign  = 'center';
+    ctx.fillText('ALTITUDE  (kft AGL)', 0, 0);
+    ctx.restore();
+
+    // ── Title ──────────────────────────────────────────────────
+    ctx.fillStyle = 'rgba(180,110,255,0.9)';
+    ctx.font      = 'bold 12px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(data.station + '  VAD Wind Profile', ML + 4, 18);
+    if (data.scanTime) {
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font      = '10px Consolas, monospace';
+      ctx.fillText(data.scanTime, ML + 4, 30);
+    }
+
+    // ── Column headers ─────────────────────────────────────────
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.font      = '9px Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('kft', ML - 30, MT - 12);
+    ctx.fillText('↑ Wind', BARB_X + 2, MT - 12);
+    ctx.textAlign = 'left';
+    ctx.fillText('Spd / Dir    RMS', BARB_X + 45, MT - 12);
+
+    // ── Wind barbs & labels ────────────────────────────────────
+    for (const lvl of levels) {
+      const y     = hy(lvl.hgt);
+      const color = spColor(lvl.spd);
+
+      if (lvl.spd === null || lvl.dir === null) {
+        // Missing: dot + M
+        ctx.fillStyle = '#333';
+        ctx.beginPath();
+        ctx.arc(BARB_X, y, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle  = '#444';
+        ctx.font       = '8px Consolas, monospace';
+        ctx.textAlign  = 'center';
+        ctx.fillText('M', BARB_X + 25, y + 3);
+      } else {
+        _vwpDrawBarb(ctx, BARB_X, y, lvl.spd, lvl.dir, color);
+
+        // Speed / direction text
+        const spdStr = String(lvl.spd).padStart(3, ' ');
+        const dirStr = String(lvl.dir).padStart(3, ' ');
+        const rmsStr = lvl.rms != null ? lvl.rms.toFixed(1) : ' -- ';
+        ctx.fillStyle  = 'rgba(255,255,255,0.55)';
+        ctx.font       = '9.5px Consolas, monospace';
+        ctx.textAlign  = 'left';
+        ctx.fillText(spdStr + 'kt ' + dirStr + '\u00b0   ' + rmsStr, BARB_X + 44, y + 3.5);
+      }
+
+      // Small tick on axis
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth   = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(AXIS_X - 3, y);
+      ctx.lineTo(AXIS_X + 3, y);
+      ctx.stroke();
+    }
+
+    // ── Speed legend ───────────────────────────────────────────
+    const legend = [
+      { color: '#4caf50', label: '< 15 kt' },
+      { color: '#ccd000', label: '15–30 kt' },
+      { color: '#ff8800', label: '30–50 kt' },
+      { color: '#e53935', label: '50–80 kt' },
+      { color: '#cc00ee', label: '≥ 80 kt' },
+    ];
+    let lx = ML + 4;
+    const ly = H - 10;
+    ctx.font = '9px Inter, sans-serif';
+    for (const leg of legend) {
+      ctx.fillStyle = leg.color;
+      ctx.fillRect(lx, ly - 5, 18, 3);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.textAlign = 'left';
+      ctx.fillText(leg.label, lx + 22, ly);
+      lx += 85;
+    }
+
+    if (canWrap) canWrap.style.display = '';
+  }
+
+  // Draw a single wind barb at (cx, cy) for given speed (kt) and direction (deg from)
+  function _vwpDrawBarb(ctx, cx, cy, spd, dir, color) {
+    const STAFF = 32;  // staff length in pixels
+    const dirRad = dir * Math.PI / 180;  // direction wind comes FROM → staff points toward source
+
+    const staffX = cx + Math.sin(dirRad) * STAFF;
+    const staffY = cy - Math.cos(dirRad) * STAFF;
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = 1.5;
+
+    // Origin circle
+    ctx.beginPath();
+    ctx.arc(cx, cy, spd < 3 ? 4 : 2.5, 0, Math.PI * 2);
+    if (spd < 3) {
+      ctx.stroke();  // calm: open circle
+      return;
+    }
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // Staff
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(staffX, staffY);
+    ctx.stroke();
+
+    // Barbs drawn along the staff, on the right side (looking from tip toward cx,cy)
+    // Perpendicular-right direction: rotate dir 90° clockwise = dir + 90°
+    const perpR = (dir + 90) * Math.PI / 180;
+    const bpX = Math.sin(perpR);  // x component of right-perp unit vector
+    const bpY = -Math.cos(perpR); // y component
+
+    let remaining = Math.round(spd / 5) * 5;  // round to nearest 5 kt
+    let pos = 0;  // distance along staff from cx,cy where next barb goes
+
+    function barbPt(t) {
+      return {
+        x: cx + Math.sin(dirRad) * t,
+        y: cy - Math.cos(dirRad) * t,
+      };
+    }
+
+    // Pennants first (50 kt each) — filled triangle
+    while (remaining >= 50) {
+      const b0 = barbPt(pos);
+      const b1 = barbPt(pos + 9);
+      const tip = { x: b0.x + bpX * 11, y: b0.y + bpY * 11 };
+      ctx.beginPath();
+      ctx.moveTo(b0.x, b0.y);
+      ctx.lineTo(b1.x, b1.y);
+      ctx.lineTo(tip.x, tip.y);
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.fill();
+      pos += 10;
+      remaining -= 50;
+    }
+
+    // Full barbs (10 kt each)
+    while (remaining >= 10) {
+      const bp = barbPt(pos);
+      const ep = { x: bp.x + bpX * 10, y: bp.y + bpY * 10 };
+      ctx.beginPath();
+      ctx.moveTo(bp.x, bp.y);
+      ctx.lineTo(ep.x, ep.y);
+      ctx.stroke();
+      pos += 7;
+      remaining -= 10;
+    }
+
+    // Half barb (5 kt)
+    if (remaining >= 5) {
+      const startPos = Math.max(pos, 5);
+      const bp = barbPt(startPos);
+      const ep = { x: bp.x + bpX * 5.5, y: bp.y + bpY * 5.5 };
+      ctx.beginPath();
+      ctx.moveTo(bp.x, bp.y);
+      ctx.lineTo(ep.x, ep.y);
+      ctx.stroke();
+    }
+  }
+
+  // Initialize VWP module
+  function initVwp() {
+    _vwpPopulateStations();
+
+    // Set default date to today UTC
+    const today = new Date();
+    const pad2  = n => String(n).padStart(2, '0');
+    const todayStr = today.getUTCFullYear() + '-'
+      + pad2(today.getUTCMonth() + 1) + '-'
+      + pad2(today.getUTCDate());
+    const datEl = document.getElementById('snd-vwp-date');
+    if (datEl) datEl.value = todayStr;
+
+    const listBtn = document.getElementById('snd-vwp-list-btn');
+    const loadBtn = document.getElementById('snd-vwp-load-btn');
+    if (listBtn) listBtn.addEventListener('click', _vwpListScans);
+    if (loadBtn) loadBtn.addEventListener('click', _vwpLoadProfile);
+  }
+
   // ══ Public init ═════════════════════════════════════════════════
   let _initialized = false;
   window.soundingInit = function () {
@@ -1735,6 +2360,7 @@
       wireEvents();
       _init3DInteraction();
       initTrep();
+      initVwp();
       showEmpty();
       setStatus('', 'Select a station and date, then click Fetch or try the Demo sounding.');
     }

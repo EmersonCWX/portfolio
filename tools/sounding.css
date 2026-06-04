@@ -581,3 +581,69 @@
   line-height: 1.5;
   font-style: italic;
 }
+
+/* ── WSR-88D VAD Wind Profile (VWP) panel ── */
+.snd-vwp-wrap {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(139,32,192,0.2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+
+.snd-vwp-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.snd-vwp-meta {
+  font-size: 9px;
+  color: #555;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.snd-vwp-canvas-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(139,32,192,0.15);
+  margin-top: 8px;
+}
+
+#snd-vwp-canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* Speed legend row */
+.snd-vwp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.snd-vwp-legend-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+@media (max-width: 600px) {
+  .snd-vwp-wrap { padding: 12px; }
+  .snd-vwp-header { flex-direction: column; align-items: flex-start; }
+}
