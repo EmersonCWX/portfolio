@@ -8,16 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- ── Tool stylesheets ── -->
-  <link rel="stylesheet" href="tools/avc.css" />
-  <link rel="stylesheet" href="tools/mvrp.css" />
-  <link rel="stylesheet" href="tools/mrms.css" />
   <link rel="stylesheet" href="tools/dsa.css" />
-  <link rel="stylesheet" href="tools/nwp.css" />
   <link rel="stylesheet" href="tools/sounding.css" />
   <style>
     *, *::before, *::after {
@@ -716,11 +709,21 @@
       margin-top: 2px;
     }
 
-    .me-badge-global   { color: #b07ee0; border: 1px solid rgba(176, 126, 224, 0.4); background: rgba(176, 126, 224, 0.1); }
-    .me-badge-regional { color: #7ab3e0; border: 1px solid rgba(122, 179, 224, 0.4); background: rgba(122, 179, 224, 0.1); }
-    .me-badge-meso     { color: #c4a84e; border: 1px solid rgba(196, 168, 78,  0.4); background: rgba(196, 168, 78,  0.1); }
-    .me-badge-ensemble { color: #7dba84; border: 1px solid rgba(125, 186, 132, 0.4); background: rgba(125, 186, 132, 0.1); }
-    .me-badge-custom   { color: #7adce0; border: 1px solid rgba(122, 220, 224, 0.4); background: rgba(122, 220, 224, 0.1); }
+    .me-badge-mine     { color: #7adce0; border: 1px solid rgba(122, 220, 224, 0.4); background: rgba(122, 220, 224, 0.1); }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 5px 16px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .back-btn:hover { border-color: var(--teal); color: var(--teal); }
 
 
     .me-nick {
@@ -828,10 +831,6 @@
       #projects-view,
       #portfolio-view,
       #model-explorer-view,
-      #avc-view,
-      #mvrp-view,
-      #mrms-view,
-      #nwp-view,
       #sounding-view {
         width: 100vw;
         max-width: 100vw;
@@ -896,36 +895,6 @@
       .me-grid {
         grid-template-columns: 1fr;
       }
-
-      /* ── AVC ── */
-      .avc-wrapper {
-        padding: 18px 14px;
-      }
-      .avc-cards-row {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      }
-      .avc-kp-scale {
-        grid-template-columns: repeat(3, 1fr);
-      }
-      .avc-chart-box {
-        height: 200px;
-      }
-
-      /* ── MVRP ── */
-      #mvrp-map {
-        height: 300px;
-      }
-      .mvrp-map-wrap {
-        min-height: 300px;
-      }
-      .mvrp-nwp-chip {
-        font-size: 10px;
-        padding: 3px 7px;
-      }
-      /* ── NWP ── */
-      .nwp-fhr-row input[type=range] { width: 180px; }
-      #nwp-map { height: 280px; }
-      .nwp-windy-frame { height: 280px; }
     }
 
     /* ══════════════════════════════════════
@@ -941,10 +910,6 @@
       #projects-view,
       #portfolio-view,
       #model-explorer-view,
-      #avc-view,
-      #mvrp-view,
-      #mrms-view,
-      #nwp-view,
       #sounding-view {
         max-height: none;
         overflow-y: visible;
@@ -958,15 +923,6 @@
         white-space: normal;
         text-align: center;
       }
-      .avc-kp-scale {
-        grid-template-columns: repeat(3, 1fr);
-      }
-      #mvrp-map { height: 340px; }
-      .mvrp-map-wrap { min-height: 340px; }
-      #mrms-map { height: 300px; }
-      .mrms-map-wrap { min-height: 300px; }
-      #nwp-map { height: 340px; }
-      .nwp-windy-frame { height: 340px; }
     }
 
     /* ── Live Reconnaissance ──────────────────────────────────────────── */
@@ -977,6 +933,150 @@
     .lr-back-btn {
       display: block !important;
       margin: 0 auto 14px !important;
+    }
+    .lr-storm-header {
+      background: #1a1d22;
+      border: 1px solid #2a2d33;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .lr-storm-header-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .lr-storm-tabs {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .lr-storm-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      background: #16181d;
+      border: 1px solid #2a2d33;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .lr-storm-tab:hover { background: #1d2027; border-color: #3a3f45; }
+    .lr-storm-tab--active { background: #0d2b1a !important; border-color: var(--teal) !important; }
+    .lr-storm-tab-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #666; flex-shrink: 0;
+    }
+    .lr-storm-tab-dot.lr-cat-1 { background: #ffeb3b; }
+    .lr-storm-tab-dot.lr-cat-2 { background: #ffc107; }
+    .lr-storm-tab-dot.lr-cat-3 { background: #ff9800; }
+    .lr-storm-tab-dot.lr-cat-4 { background: #f44336; }
+    .lr-storm-tab-dot.lr-cat-5 { background: #ff4f9a; }
+    .lr-storm-tab-name {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #d0d0d0;
+      text-transform: uppercase;
+    }
+    .lr-storm-tab--active .lr-storm-tab-name { color: var(--teal); }
+    .lr-storm-tab-cat {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #666;
+    }
+    .lr-storm-cat {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      background: #242730;
+      color: #e0e0e0;
+      border: 1px solid #3a3f45;
+      white-space: nowrap;
+    }
+    .lr-storm-cat.lr-cat-1 { background: rgba(255,235,59,0.14); color: #ffeb3b; border-color: rgba(255,235,59,0.4); }
+    .lr-storm-cat.lr-cat-2 { background: rgba(255,193,7,0.14);  color: #ffc107; border-color: rgba(255,193,7,0.4); }
+    .lr-storm-cat.lr-cat-3 { background: rgba(255,152,0,0.14);  color: #ff9800; border-color: rgba(255,152,0,0.45); }
+    .lr-storm-cat.lr-cat-4 { background: rgba(244,67,54,0.15);  color: #f44336; border-color: rgba(244,67,54,0.5); }
+    .lr-storm-cat.lr-cat-5 { background: rgba(233,30,99,0.16);  color: #ff4f9a; border-color: rgba(233,30,99,0.55); }
+    .lr-storm-name {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+    .lr-storm-basin {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #666;
+    }
+    .lr-storm-updated {
+      margin-left: auto;
+      font-size: 0.68rem;
+      color: #555;
+      font-family: monospace;
+      white-space: nowrap;
+    }
+    .lr-storm-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .lr-storm-stat-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: monospace;
+      color: #e0e0e0;
+      letter-spacing: 0.02em;
+    }
+    .lr-storm-stat-label {
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #666;
+      margin-top: 3px;
+    }
+    .lr-storm-aircraft-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: #999;
+      padding-top: 10px;
+      border-top: 1px solid #2a2d33;
+    }
+    .lr-storm-aircraft-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #555;
+      flex-shrink: 0;
+    }
+    .lr-storm-aircraft-status.lr-aircraft-in-storm .lr-storm-aircraft-dot {
+      background: #f44336;
+      box-shadow: 0 0 0 0 rgba(244,67,54,0.5);
+      animation: lr-pulse 1.4s ease infinite;
+    }
+    .lr-storm-aircraft-status.lr-aircraft-in-storm { color: #f44336; font-weight: 700; }
+    @media (max-width: 700px) {
+      .lr-storm-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 420px) {
+      .lr-storm-stats { grid-template-columns: 1fr; }
     }
     .lr-status-strip {
       display: flex;
@@ -1158,15 +1258,55 @@
       border: 1px solid #2a2d33;
       overflow: hidden;
       background: #12151a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
+    .lr-track-img { width: 100%; height: 100%; object-fit: contain; }
+    .lr-track-empty {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: #666; font-size: 0.8rem; text-align: center; padding: 20px;
+    }
+    .lr-track-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .lr-track-tab {
+      background: #1a1d22;
+      border: 1px solid #2a2d33;
+      color: #999;
+      font-size: 0.72rem;
+      padding: 5px 11px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .lr-track-tab--active { color: #e8e8e8; border-color: #4caf50; }
+    .lr-track-refresh-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid #2a2d33;
+      color: #999;
+      font-size: 0.72rem;
+      padding: 5px 11px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .lr-track-refresh-btn:hover { color: #e8e8e8; border-color: #4caf50; }
     .lr-map-legend {
       display: flex;
       gap: 14px;
       flex-wrap: wrap;
+      align-items: center;
       margin-top: 7px;
       font-size: 0.68rem;
       color: #888;
     }
+    .lr-csv-link { margin-left: auto; color: #6dbf8a; text-decoration: none; }
+    .lr-csv-link:hover { text-decoration: underline; }
     .lr-legend-item { display: flex; align-items: center; gap: 4px; }
     .lr-legend-enroute::before  { content:''; color:#4caf50; font-weight:900; margin-right:3px; }
     .lr-legend-in-storm::before { content:''; color:#f44336; font-weight:900; margin-right:3px; }
@@ -1407,225 +1547,59 @@
   </nav>
   </div><!-- end #bottom-bar -->
 
-  <!-- ── MV-REP view ── -->
-  <div id="mvrp-view" class="view hidden">
-    <button class="mvrp-back-btn" id="mvrp-back-btn">&#8592; Model Explorer</button>
-    <h2 class="proj-title">MV-REP</h2>
-    <p class="proj-subtitle">Experimental Mesovortex Risk Evaluation Parameter - CONUS Landfall Analysis</p>
-
-    <div class="mvrp-layout">
-
-      <!-- Storm selector panel -->
-      <div class="mvrp-panel">
-
-        <div class="mvrp-panel-title" style="display:flex;align-items:center;justify-content:space-between">
-          LIVE STORMS <span class="mvrp-live-dot" id="mvrp-live-dot"></span>
-        </div>
-        <div id="mvrp-live-status" class="mvrp-no-storms">Checking NHC&hellip;</div>
-        <div id="mvrp-live-cards"></div>
-
-        <div class="mvrp-panel-title" style="margin-top:16px">HISTORICAL CASES</div>
-        <div id="mvrp-hist-cards"></div>
-
-        <!-- Legend -->
-        <div class="mvrp-legend">
-          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#22bb33"></div>5-15%</div>
-          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#d4e600"></div>15-30%</div>
-          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#ffcc00"></div>30-45%</div>
-          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#ff6600"></div>45-60%</div>
-          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch" style="background:#dd1111"></div>60-75%</div>
-          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch hatched" style="background:#cc00cc"></div>75-90%</div>
-          <div class="mvrp-legend-item"><div class="mvrp-legend-swatch hatched" style="background:#ff69b4"></div>90%+</div>
-        </div>
-      </div>
-
-      <!-- Map panel -->
-      <div>
-        <div class="mvrp-info-bar" id="mvrp-info-bar">
-          <span class="mvrp-cat-badge" id="mvrp-cat-badge"></span>
-          <span style="font-size:11px;color:var(--text-muted)">Peak mesovortex risk</span>
-          <span class="mvrp-peak-risk" id="mvrp-peak-val" style="font-size:20px;margin:0"></span>
-        </div>
-        <div class="mvrp-status" id="mvrp-status">Select a storm from the panel to run the analysis.</div>
-        <!-- NWP convective parameter summary (HRRR / RRFS UH + SRH) -->
-        <div class="mvrp-nwp-row" id="mvrp-nwp-row"></div>
-        <div class="mvrp-map-wrap">
-          <div id="mvrp-map"></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ── AVC view ── -->
-  <div id="avc-view" class="view hidden">
-    <button class="mvrp-back-btn" id="avc-back-btn">&#8592; Model Explorer</button>
-    <h2 class="proj-title">AVC</h2>
-    <p class="proj-subtitle">Aurora Visibility Calculator</p>
-
-    <div class="avc-error" id="avc-error"></div>
-    <div class="avc-loading" id="avc-loading">Loading aurora forecast data&hellip;</div>
-
-    <div class="avc-wrapper" id="avc-content" style="display:none">
-
-      <div class="avc-section">
-        <div class="avc-section-title">Current Aurora Forecast</div>
-        <div class="avc-cards-row">
-          <div class="avc-card"><div class="avc-label">Current Kp Index</div><div class="avc-value" id="avc-kp">--</div></div>
-          <div class="avc-card"><div class="avc-label">Your Location</div><div class="avc-value" style="font-size:13px;font-family:Inter,sans-serif" id="avc-loc">Detecting&hellip;</div></div>
-          <div class="avc-card"><div class="avc-label">Cloud Cover</div><div class="avc-value" style="font-size:14px;font-family:Inter,sans-serif" id="avc-cloud">--</div></div>
-          <div class="avc-card"><div class="avc-label">Bz (Magnetic Field)</div><div class="avc-value" id="avc-bz">-- nT</div></div>
-          <div class="avc-card"><div class="avc-label">Aurora Visibility Rating</div><div class="avc-value" style="font-size:12px;font-family:Inter,sans-serif" id="avc-rating">--</div></div>
-          <div class="avc-card"><div class="avc-label">Best Viewing Time (Tonight)</div><div class="avc-value" style="font-size:12px;font-family:Inter,sans-serif">22:00 - 04:00 UTC</div></div>
-        </div>
-      </div>
-
-      <div class="avc-section">
-        <div class="avc-section-title">Kp Index Scale</div>
-        <div class="avc-kp-scale">
-          <div class="avc-kp-cell avc-kp-0" data-min="0" data-max="2">0-1<br><small>Quiet</small></div>
-          <div class="avc-kp-cell avc-kp-2" data-min="2" data-max="3">2<br><small>Unsettled</small></div>
-          <div class="avc-kp-cell avc-kp-3" data-min="3" data-max="5">3-4<br><small>Active</small></div>
-          <div class="avc-kp-cell avc-kp-5" data-min="5" data-max="7">5-6<br><small>Minor Storm</small></div>
-          <div class="avc-kp-cell avc-kp-7" data-min="7" data-max="8">7<br><small>Moderate</small></div>
-          <div class="avc-kp-cell avc-kp-8" data-min="8" data-max="10">8-9<br><small>Severe</small></div>
-        </div>
-      </div>
-
-      <div class="avc-section">
-        <div class="avc-section-title">24-Hour Kp Index Forecast</div>
-        <div class="avc-chart-box">
-          <canvas id="avc-chart"></canvas>
-        </div>
-      </div>
-
-      <div class="avc-bottom">
-        Data: NOAA Space Weather Prediction Center &nbsp;&bull;&nbsp;
-        Last updated: <span id="avc-update-time">--:--:-- UTC</span>
-      </div>
-    </div>
-  </div>
-
   <!-- ── Model Explorer view ── -->
   <div id="model-explorer-view" class="view hidden">
     <h2 class="proj-title">Model Sandbox</h2>
     <p class="proj-subtitle">Forecasting models</p>
 
     <div class="me-filters">
-      <button class="me-filter active" data-cat="all">All</button>
-      <button class="me-filter" data-cat="Global">Global</button>
-      <button class="me-filter" data-cat="Mesoscale">Mesoscale</button>
-      <button class="me-filter" data-cat="Custom">Custom</button>
+      <button class="me-filter active" data-cat="My Projects">My Projects</button>
     </div>
 
     <div class="me-grid" id="me-grid"></div>
   </div>
-
-  <!-- ── Vermont MRMS Viewer ── -->
-  <div id="mrms-view" class="view hidden">
-    <button class="mvrp-back-btn" id="mrms-back-btn">&#8592; Model Explorer</button>
-    <h2 class="proj-title">Vermont MRMS Viewer</h2>
-    <p class="proj-subtitle">Multi-Radar/Multi-Sensor System  Northeast CONUS</p>
-
-    <!-- Product selector -->
-    <div class="mrms-product-bar" id="mrms-product-bar">
-      <button class="mrms-product-btn active" data-product="reflect">Composite Reflectivity</button>
-      <button class="mrms-product-btn" data-product="echotops">Echo Tops</button>
-      <button class="mrms-product-btn" data-product="precip1h">1-hr Precip</button>
-      <button class="mrms-product-btn" data-product="precip24h">24-hr Precip</button>
-    </div>
-
-    <!-- Controls row -->
-    <div class="mrms-controls">
-      <button class="mrms-loop-btn" id="mrms-loop-btn"><i class="fas fa-play" id="mrms-loop-icon"></i>&nbsp;Loop</button>
-      <span class="mrms-timestamp" id="mrms-timestamp">Fetching&hellip;</span>
-      <label class="mrms-warnings-label">
-        <input type="checkbox" id="mrms-warnings-chk"> NWS Warnings
-      </label>
-    </div>
-
-    <!-- Loop scrubber (shown when loop is active) -->
-    <div class="mrms-loop-scrubber" id="mrms-loop-scrubber">
-      <span style="font-size:11px;color:var(--text-muted)">-50 min</span>
-      <input type="range" id="mrms-scrubber" min="0" max="10" value="10" step="1">
-      <span style="font-size:11px;color:var(--text-muted)">Now</span>
-      <span class="mrms-loop-frame-label" id="mrms-frame-label">Live</span>
-    </div>
-
-    <!-- Map -->
-    <div class="mrms-map-wrap">
-      <div id="mrms-map"></div>
-    </div>
-
-    <!-- Legend -->
-    <div class="mrms-legend" id="mrms-legend">
-      <span style="font-size:11px;color:var(--text-muted);margin-right:4px">dBZ</span>
-      <div class="mrms-legend-bar">
-        <span class="mrms-legend-label">5</span>
-        <div class="mrms-legend-gradient" style="background:linear-gradient(to right,#646464,#04e9e7,#019ff4,#0300f4,#02fd02,#01c501,#008e00,#fdf802,#e5bc00,#fd9500,#fd0000,#d40000,#bc0000,#f800fd,#9854c6)"></div>
-        <span class="mrms-legend-label">75</span>
-      </div>
-    </div>
-
-
-  </div><!-- end #mrms-view -->
-
-  <!-- ── NWP Model Sandbox ── -->
-  <div id="nwp-view" class="view hidden">
-    <h2 class="proj-title">NWP Model Sandbox</h2>
-    <p class="proj-subtitle">Numerical Weather Prediction  High-Resolution Rapid Refresh</p>
-
-    <!-- ── HRRR panel (native Leaflet) ── -->
-    <div class="nwp-panel active" id="nwp-hrrr-panel">
-      <div class="nwp-section-title">PRODUCT</div>
-      <div class="mrms-product-bar" id="nwp-product-bar">
-        <button class="mrms-product-btn active" data-product="refd">Simul. Reflectivity</button>
-        <button class="mrms-product-btn" data-product="refp">Refl. + Precip Type</button>
-      </div>
-      <div class="mrms-controls">
-        <button class="mrms-loop-btn" id="nwp-loop-btn"><i class="fas fa-play" id="nwp-loop-icon"></i>&nbsp;Loop</button>
-        <div class="nwp-ts-wrap" id="nwp-timestamp">
-          <span class="nwp-ts-text">HRRR&nbsp;&middot;&nbsp;</span>
-          <div class="nwp-run-dd" id="nwp-run-dd">
-            <button class="nwp-run-dd-btn" id="nwp-run-dd-btn">
-              <span id="nwp-run-dd-label">--Z Run</span>
-              <i class="fas fa-chevron-down nwp-run-dd-caret"></i>
-            </button>
-            <div class="nwp-run-dd-menu" id="nwp-run-dd-menu"></div>
-          </div>
-          <span class="nwp-ts-text" id="nwp-fhr-display">&nbsp;&middot;&nbsp;F+00h</span>
-        </div>
-      </div>
-      <div class="nwp-fhr-row">
-        <span class="nwp-fhr-endlabel">F+00h</span>
-        <input type="range" id="nwp-fhr-slider" min="0" max="18" value="0" step="1">
-        <span class="nwp-fhr-endlabel">F+18h</span>
-        <span class="nwp-fhr-label" id="nwp-fhr-label">F+00h</span>
-      </div>
-      <div class="mrms-map-wrap">
-        <div id="nwp-map"></div>
-      </div>
-      <div class="mrms-legend">
-        <span style="font-size:11px;color:var(--text-muted);margin-right:4px">dBZ</span>
-        <div class="mrms-legend-bar">
-          <span class="mrms-legend-label">5</span>
-          <div class="mrms-legend-gradient" style="background:linear-gradient(to right,#646464,#04e9e7,#019ff4,#0300f4,#02fd02,#01c501,#008e00,#fdf802,#e5bc00,#fd9500,#fd0000,#d40000,#bc0000,#f800fd,#9854c6)"></div>
-          <span class="mrms-legend-label">75</span>
-        </div>
-      </div>
-    </div>
-
-
-  </div><!-- end #nwp-view -->
 
   <!-- ── Live Reconnaissance Dashboard ── -->
   <div id="live-recon-view" class="view hidden">
 
     <!-- Centered header -->
     <div class="lr-header">
-      <button class="mvrp-back-btn lr-back-btn" id="live-recon-back-btn">&#8592; Model Explorer</button>
+      <button class="back-btn lr-back-btn" id="live-recon-back-btn">&#8592; Model Explorer</button>
       <h2 class="proj-title">Live Reconnaissance</h2>
       <p class="proj-subtitle">NOAA &amp; USAF Hurricane Hunter - RealTime Flight Data</p>
+    </div>
+
+    <!-- Storm header banner -->
+    <div class="lr-storm-header" id="lr-storm-header" style="display:none">
+      <div class="lr-storm-tabs" id="lr-storm-tabs"></div>
+      <div class="lr-storm-header-top">
+        <span class="lr-storm-cat" id="lr-storm-cat">──</span>
+        <span class="lr-storm-name" id="lr-storm-name">──</span>
+        <span class="lr-storm-basin" id="lr-storm-basin">──</span>
+        <span class="lr-storm-updated" id="lr-storm-updated">──</span>
+      </div>
+      <div class="lr-storm-stats">
+        <div class="lr-storm-stat">
+          <div class="lr-storm-stat-val" id="lr-storm-wind">──</div>
+          <div class="lr-storm-stat-label">Max Sustained Wind</div>
+        </div>
+        <div class="lr-storm-stat">
+          <div class="lr-storm-stat-val" id="lr-storm-pres">──</div>
+          <div class="lr-storm-stat-label">Min Central Pressure</div>
+        </div>
+        <div class="lr-storm-stat">
+          <div class="lr-storm-stat-val" id="lr-storm-mov">──</div>
+          <div class="lr-storm-stat-label">Movement</div>
+        </div>
+        <div class="lr-storm-stat">
+          <div class="lr-storm-stat-val" id="lr-storm-pos">──</div>
+          <div class="lr-storm-stat-label" id="lr-storm-pos-label">Position</div>
+        </div>
+      </div>
+      <div class="lr-storm-aircraft-status" id="lr-storm-aircraft-status">
+        <span class="lr-storm-aircraft-dot"></span>
+        <span id="lr-storm-aircraft-text">Checking for active missions&hellip;</span>
+      </div>
     </div>
 
     <!-- Mission status strip -->
@@ -1671,13 +1645,22 @@
 
       <!-- Map panel -->
       <div class="lr-map-panel">
-        <div id="lr-map" class="lr-map"></div>
+        <div class="lr-track-tabs">
+          <button class="lr-track-tab lr-track-tab--active" id="lr-track-tab-latest" onclick="window._lrSetTrackView('latest')">Latest 10 min</button>
+          <button class="lr-track-tab" id="lr-track-tab-full" onclick="window._lrSetTrackView('full')">Full Mission</button>
+          <button class="lr-track-refresh-btn" id="lr-track-refresh-btn" title="Images are static — reload to see the latest">&#8635; Refresh Image</button>
+        </div>
+        <div id="lr-map" class="lr-map">
+          <img id="lr-track-img" class="lr-track-img" alt="Mission track map" style="display:none" />
+          <div class="lr-track-empty" id="lr-track-empty">No track image available yet.</div>
+        </div>
         <div class="lr-map-legend">
           <span class="lr-legend-item lr-legend-enroute">Enroute</span>
           <span class="lr-legend-item lr-legend-in-storm">In Storm</span>
           <span class="lr-legend-item lr-legend-returning">Returning</span>
           <span class="lr-legend-item lr-legend-ring">── 100 nm</span>
           <span class="lr-legend-item lr-legend-ring2">── 200 nm</span>
+          <a class="lr-csv-link" id="lr-track-csv-link" href="#" download style="display:none">&#8595; Download CSV</a>
         </div>
       </div>
 
@@ -1712,7 +1695,7 @@
       <div class="me-card me-card-clickable" id="live-recon-tdr-card">
         <div class="me-card-header">
           <span class="me-desig">TDR</span>
-          <span class="me-badge me-badge-custom">Custom</span>
+          <span class="me-badge me-badge-mine">My Projects</span>
         </div>
         <div class="me-nick">Tail Doppler Radar</div>
         <div class="me-notes">Real-time Tail Doppler Radar imagery from NOAA WP-3D aircraft during active reconnaissance missions.</div>
@@ -1721,7 +1704,7 @@
       <div class="me-card me-card-clickable" id="live-recon-dsa-card">
         <div class="me-card-header">
           <span class="me-desig">DSA</span>
-          <span class="me-badge me-badge-custom">Custom</span>
+          <span class="me-badge me-badge-mine">My Projects</span>
         </div>
         <div class="me-nick">Dropsonde Analyzer</div>
         <div class="me-notes">Real-time NOAA &amp; 53rd WRS dropsonde soundings with Skew-T/Log-P diagrams.</div>
@@ -1733,7 +1716,7 @@
 
   <!-- ── Realtime TDR & C Band ── -->
   <div id="tdr-view" class="view hidden">
-    <button class="mvrp-back-btn" id="tdr-back-btn" onclick="if(window._showLiveRecon)window._showLiveRecon();">&#8592; Live Reconnaissance</button>
+    <button class="back-btn" id="tdr-back-btn" onclick="if(window._showLiveRecon)window._showLiveRecon();">&#8592; Live Reconnaissance</button>
     <h2 class="proj-title">Realtime TDR</h2>
     <p class="proj-subtitle">NOAA Hurricane Hunter Tail Doppler Radar</p>
 
@@ -1790,7 +1773,7 @@
 
   <!-- ── Dropsonde Sounding Analyzer ── -->
   <div id="dsa-view" class="view hidden">
-    <button class="mvrp-back-btn" id="dsa-back-btn">&#8592; Live Reconnaissance</button>
+    <button class="back-btn" id="dsa-back-btn">&#8592; Live Reconnaissance</button>
     <h2 class="proj-title">Dropsonde Analyzer</h2>
     <p class="proj-subtitle">NHC Hurricane Reconnaissance Dropsonde Soundings - NOAA &amp; USAF</p>
 
@@ -1884,215 +1867,52 @@
     </div>
   </div><!-- end #dsa-view -->
 
-  <!-- ══════════════════════════════════════════════════════ -->
-  <!-- RADIOSONDE / ATMOSPHERIC SOUNDING VIEWER              -->
-  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- ══════════════════════════════════════════════════════
+       ATMOSPHERIC SOUNDING VIEWER
+       ══════════════════════════════════════════════════════ -->
   <div id="sounding-view" class="view hidden">
-    <button class="mvrp-back-btn" id="sounding-back-btn">&#8592; Model Explorer</button>
+    <button class="back-btn" id="sounding-back-btn">&#8592; Model Explorer</button>
 
-    <h2 class="proj-title" style="margin-top:12px">Sounding &amp; VWP Sandbox</h2>
-    <p class="proj-subtitle">NOAA Upper-Air Atmospheric Sounding &bull; Skew-T Log-P Diagram &bull; Hodograph &bull; WSR-88D VAD Wind Profiles</p>
+    <h2 class="proj-title" style="margin-top:12px">Sounding Sandbox</h2>
+    <p class="proj-subtitle">U.S. Upper-Air Observations &bull; Skew-T Log-P &bull; Hodograph &bull; SounderPy Parameters</p>
     <p style="font-style:italic;font-size:10px;color:var(--text-muted);margin-top:4px;margin-bottom:16px">These tools are experimental and intended for research purposes only.</p>
 
     <!-- Controls -->
     <div class="snd-controls">
       <div class="snd-ctrl-group">
-        <span class="snd-label">Station Select</span>
-        <select class="snd-select" id="snd-station-select" style="width:220px">
-          <option value=""> select station </option>
+        <span class="snd-label">Station</span>
+        <select class="snd-select" id="snd-station-select" style="width:260px" disabled>
+          <option value="">Loading&hellip;</option>
         </select>
       </div>
       <div class="snd-ctrl-group">
-        <span class="snd-label">Year</span>
-        <input class="snd-input snd-input-sm" id="snd-year"  type="number" placeholder="YYYY" min="1973" max="2099" style="width:62px" />
-        <span class="snd-label">Mo</span>
-        <input class="snd-input snd-input-sm" id="snd-month" type="number" placeholder="MM"   min="1"    max="12"   style="width:46px" />
-        <span class="snd-label">Day</span>
-        <input class="snd-input snd-input-sm" id="snd-day"   type="number" placeholder="DD"   min="1"    max="31"   style="width:46px" />
-        <span class="snd-label">Hour</span>
-        <select class="snd-select" id="snd-hour" style="width:64px">
-          <option value="0">00Z</option>
-          <option value="12" selected>12Z</option>
-        </select>
+        <span class="snd-label">Launch</span>
+        <button class="snd-nav-btn" id="snd-prev-btn" title="Older sounding" aria-label="Older sounding" disabled>&#8249;</button>
+        <select class="snd-select" id="snd-cycle-select" style="width:150px" disabled></select>
+        <button class="snd-nav-btn" id="snd-next-btn" title="Newer sounding" aria-label="Newer sounding" disabled>&#8250;</button>
       </div>
-      <button class="snd-fetch-btn" id="snd-fetch-btn">Fetch Sounding</button>
-      <button class="snd-demo-btn"  id="snd-demo-btn">Demo</button>
+      <a class="snd-raw-btn" id="snd-raw-link" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true">Raw Data (UWyo)</a>
     </div>
-
-    <!-- ARCHIVED: TREP Forecast Panel — testing concluded
-    <div class="snd-trep-wrap" style="display:none">
-      <div class="snd-trep-header">
-        <span class="snd-card-title" style="margin-bottom:0">TREP - Tornado Risk Evaluation Parameter</span>
-        <span class="snd-trep-meta">GFS & HRRR Models &bull; CONUS</span>
-      </div>
-      <div class="snd-trep-controls">
-        <span class="snd-label">Location</span>
-        <input class="snd-input" id="snd-trep-loc" type="text" placeholder="City, ST  or  lat, lon" style="width:190px" />
-        <span class="snd-label">Forecast</span>
-        <select class="snd-select" id="snd-trep-hour" style="width:76px">
-          <option value="0">Now</option>
-          <option value="6">+6 hr</option>
-          <option value="12">+12 hr</option>
-          <option value="24">+24 hr</option>
-          <option value="48">+48 hr</option>
-        </select>
-        <span class="snd-label">Model</span>
-        <select class="snd-select" id="snd-trep-model" style="width:72px">
-          <option value="gfs_seamless">GFS</option>
-          <option value="gfs_hrrr">HRRR</option>
-        </select>
-        <button class="snd-fetch-btn" id="snd-trep-btn">Evaluate TREP</button>
-      </div>
-      <div id="snd-trep-status" class="snd-status"></div>
-      <div id="snd-trep-result" style="display:none">
-        <div class="snd-trep-result-inner">
-          <div class="snd-trep-score-block">
-            <div class="snd-trep-score" id="snd-trep-score"></div>
-            <div class="snd-trep-score-label">/ 10</div>
-          </div>
-          <div class="snd-trep-params" id="snd-trep-params"></div>
-        </div>
-        <div class="snd-trep-valid" id="snd-trep-valid"></div>
-      </div>
-    </div>
-    END ARCHIVED: TREP -->
-
-    <!-- ARCHIVED: WSR-88D VAD Wind Profile Panel — testing concluded
-    <div class="snd-vwp-wrap" id="snd-vwp-wrap">
-      <div class="snd-vwp-header">
-        <span class="snd-card-title" style="margin-bottom:0">WSR-88D VAD Vertical Wind Profile</span>
-        <span class="snd-vwp-meta">CONUS NEXRAD Level-III &bull; NVW Product &bull; Unidata THREDDS</span>
-      </div>
-      <div class="snd-controls" style="flex-wrap:wrap;gap:10px">
-        <div class="snd-ctrl-group">
-          <span class="snd-label">Radar Site</span>
-          <select class="snd-select" id="snd-vwp-station" style="width:270px"></select>
-        </div>
-        <div class="snd-ctrl-group">
-          <span class="snd-label">Date</span>
-          <input type="date" id="snd-vwp-date" class="snd-input" style="width:136px" />
-        </div>
-        <button class="snd-fetch-btn" id="snd-vwp-list-btn">List Scans</button>
-      </div>
-      <div class="snd-controls snd-vwp-scan-row" id="snd-vwp-scan-row" style="display:none;flex-wrap:wrap;gap:10px;padding-top:8px;border-top:1px solid rgba(139,32,192,0.12)">
-        <div class="snd-ctrl-group">
-          <span class="snd-label">Scan (UTC)</span>
-          <select class="snd-select" id="snd-vwp-scan-sel" style="width:180px"></select>
-        </div>
-        <button class="snd-fetch-btn" id="snd-vwp-load-btn">Load VWP &rarr;</button>
-      </div>
-      <div class="snd-status" id="snd-vwp-status"></div>
-      <div class="snd-vwp-canvas-wrap" id="snd-vwp-canvas-wrap" style="display:none">
-        <canvas id="snd-vwp-canvas"></canvas>
-      </div>
-    </div>
-    END ARCHIVED: VWP -->
 
     <!-- Status bar -->
     <div class="snd-status" id="snd-status"></div>
 
-    <!-- Main layout: Skew-T | side panel -->
-    <div class="snd-main" id="snd-main-layout" style="display:none">
-
-      <!-- LEFT: Skew-T canvas -->
-      <div class="snd-skewt-wrap">
-        <canvas id="snd-skewt-canvas"></canvas>
-        <div class="snd-canvas-tip" id="snd-skewt-tip"></div>
-      </div>
-
-      <!-- RIGHT: info + indices + hodograph -->
-      <div class="snd-right">
-
-        <!-- Station info -->
-        <div class="snd-info-card">
-          <div class="snd-card-title">Station Info</div>
-          <div class="snd-info-grid">
-            <div class="snd-info-row">
-              <span class="snd-info-lbl">Station</span>
-              <span class="snd-info-val" id="snd-station-name"></span>
-            </div>
-            <div class="snd-info-row">
-              <span class="snd-info-lbl">WMO</span>
-              <span class="snd-info-val" id="snd-station-wmo"></span>
-            </div>
-            <div class="snd-info-row" style="grid-column:1/-1">
-              <span class="snd-info-lbl">Valid Time</span>
-              <span class="snd-info-val" id="snd-station-date"></span>
-            </div>
-            <div class="snd-info-row">
-              <span class="snd-info-lbl">Levels</span>
-              <span class="snd-info-val" id="snd-station-levels"></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stability indices -->
-        <div class="snd-indices-card">
-          <div class="snd-card-title">Stability Indices</div>
-          <div class="snd-idx-row"><span class="snd-idx-name">CAPE</span>       <span class="snd-idx-val" id="snd-i-cape"></span></div>
-          <div class="snd-idx-row"><span class="snd-idx-name">CIN</span>        <span class="snd-idx-val" id="snd-i-cin"></span></div>
-          <div class="snd-idx-row"><span class="snd-idx-name">Lifted Index</span><span class="snd-idx-val" id="snd-i-li"></span></div>
-          <div class="snd-idx-row"><span class="snd-idx-name">K-Index</span>   <span class="snd-idx-val" id="snd-i-ki"></span></div>
-          <div class="snd-idx-row"><span class="snd-idx-name">Precip Water</span><span class="snd-idx-val" id="snd-i-pw"></span></div>
-          <div class="snd-card-title" style="margin-top:10px">Surface / Key Levels</div>
-          <div class="snd-idx-row"><span class="snd-idx-name">Sfc Temp</span>  <span class="snd-idx-val" id="snd-i-sfct"></span></div>
-          <div class="snd-idx-row"><span class="snd-idx-name">Sfc Dewpt</span> <span class="snd-idx-val" id="snd-i-sfctd"></span></div>
-          <div class="snd-idx-row"><span class="snd-idx-name">Sfc RH</span>    <span class="snd-idx-val" id="snd-i-sfcrh"></span></div>
-          <div class="snd-idx-row"><span class="snd-idx-name">500 hPa Temp</span><span class="snd-idx-val" id="snd-i-t500"></span></div>
-        </div>
-
-        <!-- Hazard Assessment -->
-        <div class="snd-hazard-card" id="snd-hazard-card" style="display:none">
-          <div class="snd-card-title">Possible Hazard</div>
-          <div class="snd-hazard-badge">
-            <span id="snd-hazard-type"></span>
-          </div>
-        </div>
-
-        <!-- Hodograph -->
-        <div class="snd-hodo-card" id="snd-hodo-card">
-          <div class="snd-hodo-header">
-            <div class="snd-card-title" id="snd-hodo-title">Hodograph</div>
-            <div style="display:flex;gap:4px;align-items:center">
-              <button class="snd-hodo-toggle" id="snd-hodo-toggle-btn" title="Toggle 3D view">2D / 3D</button>
-              <button class="snd-hodo-toggle snd-hodo-fs-btn" id="snd-hodo3d-fs-btn" title="Full screen 3D" style="display:none">&#x26F6;</button>
-            </div>
-          </div>
-          <canvas id="snd-hodo-canvas"></canvas>
-          <canvas id="snd-hodo-3d-canvas" style="display:none"></canvas>
-        </div>
-
-      </div><!-- end .snd-right -->
-    </div><!-- end #snd-main-layout -->
+    <!-- SounderPy sounding -->
+    <figure class="snd-figure" id="snd-figure" hidden>
+      <a id="snd-img-link" href="#" target="_blank" rel="noopener noreferrer"><img id="snd-img" alt="" /></a>
+      <figcaption id="snd-caption"></figcaption>
+    </figure>
 
     <!-- Empty state -->
     <div class="snd-empty" id="snd-empty-state">
-      <p>Enter a WMO station number and a date above, then click <strong>Fetch Sounding</strong>.<br>
-      Use the quick-select list for common US upper-air sites, or click <strong>Demo</strong> to preview a classic supercell sounding.</p>
-    </div>
-
-    <!-- Data table -->
-    <div class="snd-table-wrap" id="snd-table-wrap" style="display:none">
-      <div class="snd-table-scroll">
-        <table class="snd-table">
-          <thead>
-            <tr>
-              <th>Pres (hPa)</th>
-              <th>Hght (ft)</th>
-              <th>Temp (°F)</th>
-              <th>Dwpt (°F)</th>
-              <th>RH (%)</th>
-              <th>Wind</th>
-            </tr>
-          </thead>
-          <tbody id="snd-data-tbody"></tbody>
-        </table>
-      </div>
+      <p id="snd-empty-msg">Loading the sounding archive&hellip;</p>
     </div>
 
     <div class="snd-source">
       Upper-air data: <a href="https://weather.uwyo.edu/upperair/sounding.html" target="_blank" rel="noopener noreferrer" style="color:rgba(139,32,192,0.8)">University of Wyoming RAOBs</a>
-      &nbsp;&bull;&nbsp; Coded &amp; Visualized by Sabr3&nbsp;|&nbsp;VTSU Atmospheric Sciences
+      &nbsp;&bull;&nbsp; Rendered with <a href="https://github.com/kylejgillett/sounderpy" target="_blank" rel="noopener noreferrer" style="color:rgba(139,32,192,0.8)">SounderPy</a> &amp; MetPy
+      &nbsp;&bull;&nbsp; Coded by Sabr3&nbsp;|&nbsp;VTSU Atmospheric Sciences
+      <br><span id="snd-updated"></span>
     </div>
   </div><!-- end #sounding-view -->
 
@@ -2209,15 +2029,11 @@
       const projectsView      = document.getElementById('projects-view');
       const portfolioView     = document.getElementById('portfolio-view');
       const modelExplorerView = document.getElementById('model-explorer-view');
-      const avcView            = document.getElementById('avc-view');
-      const mvrpView           = document.getElementById('mvrp-view');
-      const mrmsView           = document.getElementById('mrms-view');
-      const nwpView            = document.getElementById('nwp-view');
       const dsaView            = document.getElementById('dsa-view');
       const tdrView            = document.getElementById('tdr-view');
       const liveReconView      = document.getElementById('live-recon-view');
       const soundingView       = document.getElementById('sounding-view');
-      const allViews = [profileView, projectsView, portfolioView, modelExplorerView, avcView, mvrpView, mrmsView, nwpView, dsaView, tdrView, liveReconView, soundingView];
+      const allViews = [profileView, projectsView, portfolioView, modelExplorerView, dsaView, tdrView, liveReconView, soundingView];
       const tagline = document.getElementById('bottom-tagline');
       const scrollRoot = document.getElementById('scroll-root');
 
@@ -2229,10 +2045,6 @@
         allViews.forEach(v => v.classList.add('hidden'));
         show.classList.remove('hidden');
         tagline.style.display = (show === profileView) ? '' : 'none';
-        if (show === avcView)  avcInit();
-        if (show === mvrpView && window.mvrpInit) window.mvrpInit();
-        if (show === mrmsView) mrmsInit();
-        if (show === nwpView)  nwpInit();
         if (show === dsaView)        dsaInit();
         if (show === tdrView)        tdrInit();
         if (show === liveReconView && window.liveReconInit) liveReconInit();
@@ -2254,9 +2066,6 @@
         showView(modelExplorerView);
       });
 
-      window._showAVC            = function () { showView(avcView); };
-      window._showMVRP           = function () { showView(mvrpView); };
-      window._showMRMS           = function () { showView(mrmsView); };
       window._showDropsonde       = function () { showView(dsaView); };
       window._showTDR             = function () { showView(tdrView); };
       window._showLiveRecon       = function () { showView(liveReconView); };
@@ -2272,15 +2081,6 @@
       document.getElementById('live-recon-dsa-card').addEventListener('click', function () {
         showView(dsaView);
       });
-      window._showNWP  = function (model) {
-        showView(nwpView);
-        if (model && model !== 'hrrr') {
-          setTimeout(function () {
-            var tab = document.querySelector('.nwp-model-tab[data-model="' + model + '"]');
-            if (tab) tab.click();
-          }, 80);
-        }
-      };
 
       document.querySelector('.social-btn[title="Home"]').addEventListener('click', function (e) {
         e.preventDefault();
@@ -2291,16 +2091,12 @@
     // ── Model Explorer ──
     (function () {
       const MODELS = [
-        { cat: 'Mesoscale', desig: 'HRRR',  nick: 'High-Resolution Rapid Refresh',   dev: 'NOAA / NCAR',  res: '~3 km',  horizon: '48 hr',     cycle: 'Hourly',       notes: 'Convection-allowing; gold standard for real-time CONUS mesoscale wx', action: 'nwp-hrrr' },
-        { cat: 'Custom',    desig: 'AVC',   nick: 'Aurora Visibility Calculator',    dev: 'Sabr3 / VTSU', res: 'N/A',    horizon: 'Real-time', cycle: 'On demand',    notes: 'Predicts aurora borealis visibility using real-time geomagnetic and solar wind data with location-aware forecasting', action: 'avc' },
-        { cat: 'Custom',    desig: 'MV-REP', nick: 'Mesovortex Risk Evaluation Parameter', dev: 'Sabr3 / VTSU', res: '~3 km',  horizon: '6-12 hr',   cycle: 'Experimental', notes: 'Next-generation parameter targeting mesovortex formation within landfalling major hurricanes; Meso-Vortice Project', action: 'mvrp' },
-        { cat: 'Custom',    desig: 'MRMS',   nick: 'Vermont MRMS Viewer',                  dev: 'Sabr3 / VTSU', res: '~1 km',  horizon: 'Real-time', cycle: '~2 min',       notes: 'Live Multi-Radar/Multi-Sensor System composite reflectivity, echo tops and QPE for the Northeast CONUS.', action: 'mrms' },
-        { cat: 'Custom',    desig: 'RECON', nick: 'Live Reconnaissance',                   dev: 'Sabr3 / VTSU', res: '~150 m',  horizon: 'Real-time',    cycle: 'Real-time',  notes: 'Live NOAA & USAF Hurricane Hunter data — Tail Doppler Radar imagery and dropsonde soundings from active missions.', action: 'live-recon' },
-        { cat: 'Custom',    desig: 'TREP & VWP',  nick: 'Radiosonde Sounding Viewer',              dev: 'Sabr3 / VTSU', res: 'Point',  horizon: 'Archive',       cycle: 'On demand',  notes: 'Interactive upper-air sounding viewer with an experimental TREP system & 3D VWP playground.', action: 'sounding' },
+        { cat: 'My Projects', desig: 'RECON',    nick: 'Live Reconnaissance',        dev: 'Sabr3 / VTSU', res: '~150 m', horizon: 'Real-time', cycle: 'Real-time', notes: 'Live NOAA & USAF Hurricane Hunter data — Tail Doppler Radar imagery and dropsonde soundings from active missions.', action: 'live-recon' },
+        { cat: 'My Projects', desig: 'SOUNDING', nick: 'Radiosonde Sounding Viewer', dev: 'Sabr3 / VTSU', res: 'Point',  horizon: '7 days',    cycle: '00Z / 12Z + specials', notes: 'U.S. upper-air soundings from the University of Wyoming archive, rendered with SounderPy & MetPy.', action: 'sounding' },
       ];
 
       const grid = document.getElementById('me-grid');
-      const badgeClass = { 'Global': 'me-badge-global', 'Mesoscale': 'me-badge-meso', 'Custom': 'me-badge-custom' };
+      const badgeClass = { 'My Projects': 'me-badge-mine' };
 
       function renderCards(models) {
         grid.innerHTML = '';
@@ -2324,10 +2120,6 @@
           `;
           if (m.action) {
             card.addEventListener('click', function () {
-              if (m.action === 'avc')        { window._showAVC(); }
-              if (m.action === 'mvrp')       { window._showMVRP(); }
-              if (m.action === 'mrms')       { window._showMRMS(); }
-              if (m.action === 'nwp-hrrr')   { window._showNWP('hrrr'); }
               if (m.action === 'dropsonde')  { window._showDropsonde && window._showDropsonde(); }
               if (m.action === 'tdr')        { window._showTDR && window._showTDR(); }
               if (m.action === 'live-recon') { window._showLiveRecon && window._showLiveRecon(); }
@@ -2379,14 +2171,10 @@
   </script>
 
   <!-- ── Tool scripts ── -->
-  <script src="tools/mvrp.js?v=2"></script>
-  <script src="tools/aurora-calc.js"></script>
-  <script src="tools/dsa.js?v=2"></script>
+  <script src="tools/dsa.js"></script>
   <script src="tools/sounding.js"></script>
   <script src="tools/tdr.js"></script>
   <script src="tools/liveRecon.js"></script>
-  <script src="tools/mrms.js"></script>
-  <script src="tools/nwp.js"></script>
 
   <!-- Custom cursor -->
   <canvas id="cursor-star" width="28" height="28"></canvas>

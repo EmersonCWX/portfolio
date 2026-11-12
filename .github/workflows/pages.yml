@@ -23,6 +23,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      # Sounding images live on the orphan `sounding-data` branch (see
+      # sounding-data.yml); include them so main deploys don't drop them.
+      - name: Checkout sounding archive
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: sounding-data
+          path: data/soundings
+          fetch-depth: 1
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

@@ -1,0 +1,45 @@
+name: Mirror NOAA Recon Data
+
+# NHC's CurrentStorms.json and NWS's raw TGFTP/API bulletins are public but do
+# not send Access-Control-Allow-Origin headers, so browsers can't fetch them
+# cross-origin. This job runs scripts/recon_data.py, which fetches everything
+# server-side (no CORS applies here) AND does all the parsing (HDOB decode,
+# phase detection, storm/mission matching) — then commits one ready-to-render
+# JSON file plus static track-map PNGs and CSV "sheets" (via scripts/recon_plot.py)
+# so the frontend only has to display them, same-origin, no map tiles/API key.
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: recon-data-mirror
+  cancel-in-progress: true
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install matplotlib
+
+      - name: Fetch + parse recon data
+        run: python scripts/recon_data.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "recon-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "chore: update recon data mirror"
+          git push

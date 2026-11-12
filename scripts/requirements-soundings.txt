@@ -1,0 +1,4 @@
+sounderpy>=3.2
+siphon>=0.10
+metpy
+pillow
