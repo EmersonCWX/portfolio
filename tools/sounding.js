@@ -90,7 +90,7 @@
     _dom.rawLink.setAttribute('aria-disabled', 'false');
     _dom.imgLink.href = src;
     _dom.img.alt = `${stationLabel(station)} sounding, ${cycleLabel(key)}`;
-    _dom.caption.textContent = `${stationLabel(station)} \u00B7 WMO ${wmo} \u00B7 ${cycleLabel(key)} \u00B7 click to open full size`;
+    _dom.caption.textContent = `${stationLabel(station)} \u00B7 WMO ${wmo} \u00B7 ${cycleLabel(key)} \u00B7 click to view fullscreen`;
     setStatus('loading', 'Loading sounding\u2026');
 
     _dom.img.onload = function () {
@@ -150,6 +150,22 @@
     _dom.empty      = document.getElementById('snd-empty-state');
     _dom.emptyMsg   = document.getElementById('snd-empty-msg');
     _dom.updated    = document.getElementById('snd-updated');
+    _dom.lightbox      = document.getElementById('snd-lightbox');
+    _dom.lightboxImg   = document.getElementById('snd-lightbox-img');
+    _dom.lightboxClose = document.getElementById('snd-lightbox-close');
+  }
+
+  function openLightbox() {
+    _dom.lightboxImg.src = _dom.img.src;
+    _dom.lightboxImg.alt = _dom.img.alt;
+    _dom.lightbox.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    _dom.lightbox.hidden = true;
+    _dom.lightboxImg.src = '';
+    document.body.style.overflow = '';
   }
 
   function wireEvents() {
@@ -164,6 +180,19 @@
     _dom.cycleSel.addEventListener('change', showSounding);
     _dom.prevBtn.addEventListener('click', () => stepCycle(1));
     _dom.nextBtn.addEventListener('click', () => stepCycle(-1));
+    // Fullscreen lightbox: plain click opens in-page; ctrl/middle-click still opens the raw image in a new tab
+    _dom.imgLink.addEventListener('click', function (e) {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      openLightbox();
+    });
+    _dom.lightboxClose.addEventListener('click', closeLightbox);
+    _dom.lightbox.addEventListener('click', function (e) {
+      if (e.target === _dom.lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !_dom.lightbox.hidden) closeLightbox();
+    });
   }
 
   let _initialized = false;
