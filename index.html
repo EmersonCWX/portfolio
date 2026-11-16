@@ -1535,7 +1535,8 @@
     <a href="#" class="social-btn" title="Projects" aria-label="Projects" id="projects-btn">
       <i class="fas fa-display"></i>
     </a>
-    <a href="#" class="social-btn" title="Model Explorer" aria-label="Model Explorer" id="model-btn">
+    <!-- Model Sandbox archived: hidden from the public nav; append ?sandbox to the URL to reveal -->
+    <a href="#" class="social-btn" title="Model Explorer" aria-label="Model Explorer" id="model-btn" style="display:none">
       <i class="fas fa-hurricane"></i>
     </a>
     <a href="https://github.com/EmersonCWX" target="_blank" rel="noopener noreferrer" class="social-btn" title="GitHub" aria-label="GitHub">
@@ -2067,7 +2068,9 @@
         showView(portfolioView);
       });
 
-      document.getElementById('model-btn').addEventListener('click', function (e) {
+      const modelBtn = document.getElementById('model-btn');
+      if (new URLSearchParams(location.search).has('sandbox')) modelBtn.style.display = '';
+      modelBtn.addEventListener('click', function (e) {
         e.preventDefault();
         showView(modelExplorerView);
       });
